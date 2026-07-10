@@ -1,6 +1,6 @@
 /**
  * サイト全体で共有する固定情報。
- * 現行PHPサイト（about.html / contact.html / index.php フッター）の記載値を移植。
+ * 現行PHPサイト（about.html / company.html / contact.html / index.phpフッター）の記載値を移植。
  */
 export const siteConfig = {
   name: "3125株式会社",
@@ -10,14 +10,24 @@ export const siteConfig = {
   description:
     "AIマンツーマン教育・AI導入支援・AI研修。東京・南青山のAIエージェンシー。",
   locale: "ja_JP",
+  foundingDate: "2024-05-27",
+  capital: "100万円",
   phone: "090-1828-5970",
   phoneHref: "tel:09018285970",
   email: "info@3125.jp",
+  businessHours: "平日 10:00 – 18:00",
   address: {
     postalCode: "107-0062",
     region: "東京都",
     locality: "港区南青山",
+    blockNumber: "3-1-36",
+    building: "青山マルタケビル6F",
     streetAddress: "3-1-36 青山マルタケビル6F",
     full: "〒107-0062 東京都港区南青山3-1-36 青山マルタケビル6F",
   },
+  representative: { name: "渡邊 隆太郎", nameEn: "Ryutaro Watanabe" },
+  directors: [
+    { name: "大須 はるか", nameEn: "Haruka Osu" },
+    { name: "佐藤 一斗", nameEn: "Kazuto Sato" },
+  ],
 } as const;

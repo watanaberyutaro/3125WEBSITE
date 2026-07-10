@@ -8,6 +8,8 @@ export function organizationJsonLd() {
     name: siteConfig.name,
     url: siteConfig.url,
     logo: `${siteConfig.url}/assets/images/favicon-512.png`,
+    description: siteConfig.description,
+    foundingDate: siteConfig.foundingDate,
     telephone: siteConfig.phone,
     email: siteConfig.email,
     address: {

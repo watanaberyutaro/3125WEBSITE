@@ -4,6 +4,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { organizationJsonLd } from "@/lib/seo/jsonld";
 import { siteConfig } from "@/lib/site-config";
 import "./globals.css";
+import "@/styles/legacy-site.css";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
