@@ -58,7 +58,7 @@ export default async function WorksCategoryPage({
         description="映像制作・Webサイト制作・写真撮影——クライアントの想いを形にした、私たちの仕事の記録です。"
       />
       <section className="section section--dark" aria-label={`${current.name}の制作実績一覧`}>
-        <WorksFilter categories={categories} activeCategory={category} />
+        <WorksFilter categories={categories} activeCategory={category} useCleanUrls />
         <WorksGrid works={works} />
       </section>
     </>

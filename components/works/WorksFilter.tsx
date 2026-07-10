@@ -2,19 +2,29 @@ import Link from "next/link";
 import type { WorkCategoryRef } from "@/lib/works/types";
 
 /**
- * カテゴリフィルタタブ。JS無しでも機能するようリンク(?category=...)として実装し、
+ * カテゴリフィルタタブ。JS無しでも機能するようリンクとして実装し、
  * サーバー側(app/(site)/works/page.tsx)でSupabaseへのクエリに反映する。
+ *
+ * /works（検索と組み合わせ可能）では ?category=... のクエリ文字列を使い、
+ * /works/category/[category]（SEO用のクリーンURL・サイトマップにも掲載）では
+ * そのままクリーンURL同士を行き来できるようにする。片方に固定すると、
+ * もう片方のページに来たユーザーがタブを押した瞬間に別URL形式へ飛ばされてしまうため。
  */
 export function WorksFilter({
   categories,
   activeCategory,
   currentQuery,
+  useCleanUrls = false,
 }: {
   categories: WorkCategoryRef[];
   activeCategory?: string;
   currentQuery?: string;
+  useCleanUrls?: boolean;
 }) {
   const buildHref = (category?: string) => {
+    if (useCleanUrls) {
+      return category ? `/works/category/${category}` : "/works";
+    }
     const params = new URLSearchParams();
     if (category) params.set("category", category);
     if (currentQuery) params.set("q", currentQuery);

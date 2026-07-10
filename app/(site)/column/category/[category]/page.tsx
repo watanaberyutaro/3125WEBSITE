@@ -58,7 +58,7 @@ export default async function ColumnCategoryPage({
         description="3125株式会社からの最新情報・ニュース・ブログをお届けします。"
       />
       <section className="section section--dark" aria-label={`${current.name}一覧`}>
-        <ColumnFilter categories={categories} activeCategory={category} />
+        <ColumnFilter categories={categories} activeCategory={category} useCleanUrls />
         <ArticleList articles={articles} />
       </section>
     </>
