@@ -79,11 +79,10 @@ npm run dev
 **本番へのデプロイ手順:**
 1. `HP/api/send-mail.php` を既存PHPホスティングへアップロード（他のPHP修正と同様、FTP等で）
 2. `.env.local`（およびVercelの環境変数）に以下を設定:
-   - `MAIL_BRIDGE_URL` — 例: `https://3125.jp/api/send-mail.php`
-     ⚠️ **Phase 9で本番ドメインをVercelへ切り替えると、`3125.jp` はNext.js側を
-     指すようになりこのURLが壊れる。** 切替前に、PHPホスティング専用の
-     サブドメイン（例: `legacy-mail.3125.jp`）等、ドメイン切替の影響を受けない
-     安定したURLに変更しておくこと。
+   - `MAIL_BRIDGE_URL` — `https://legacy.3125.jp/api/send-mail.php`
+     （Phase 9で対応済み。`3125.jp`本体はVercelへ切り替わるため、PHPホスティング
+     専用のサブドメイン`legacy.3125.jp`をさくらのレンタルサーバー上に追加し、
+     無料SSLを設定した上でメールブリッジ専用の安定したURLとして使っている）
    - `MAIL_BRIDGE_SECRET` — `HP/api/send-mail.php` 内の `MAIL_BRIDGE_SECRET`
      定数と同じ文字列にする（サーバー間通信の認証用共有シークレット）。
 3. `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` / `RECAPTCHA_SECRET_KEY` — https://www.google.com/recaptcha/admin
