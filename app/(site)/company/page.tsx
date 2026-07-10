@@ -4,23 +4,15 @@ import { SectionHeader } from "@/components/layout/SectionHeader";
 import { HomeCta } from "@/components/layout/HomeCta";
 import { Ticker } from "@/components/layout/Ticker";
 import { Reveal } from "@/components/motion/Reveal";
+import { Breadcrumb } from "@/components/seo/Breadcrumb";
 import { siteConfig } from "@/lib/site-config";
+import { buildMetadata } from "@/lib/seo/metadata";
 
-const TITLE = "会社概要";
+const TITLE = "会社概要（東京・南青山）";
 const DESCRIPTION =
   "3125株式会社の会社情報 — 東京都港区南青山に拠点を置くAIコンサルティング会社。AIマンツーマン教育・AI導入支援・AI研修を提供。会社概要・代表情報・所在地をご確認いただけます。";
 
-export const metadata: Metadata = {
-  title: `${TITLE}（東京・南青山）`,
-  description: DESCRIPTION,
-  alternates: { canonical: "/company" },
-  openGraph: {
-    title: `${TITLE} | ${siteConfig.name}（東京・南青山）`,
-    description: DESCRIPTION,
-    url: "/company",
-    images: ["/assets/images/ogp.jpg"],
-  },
-};
+export const metadata: Metadata = buildMetadata({ title: TITLE, description: DESCRIPTION, path: "/company" });
 
 const TICKER_ITEMS = [
   "AI Education",
@@ -34,6 +26,7 @@ const TICKER_ITEMS = [
 export default function CompanyPage() {
   return (
     <>
+      <Breadcrumb items={[{ name: "Home", path: "/" }, { name: "Company", path: "/company" }]} />
       <PageHero
         eyebrowNum="Co."
         label="Company"

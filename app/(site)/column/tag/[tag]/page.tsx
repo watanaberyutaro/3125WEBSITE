@@ -4,7 +4,7 @@ import { PageHero } from "@/components/layout/PageHero";
 import { ArticleList } from "@/components/column/ArticleList";
 import { Breadcrumb } from "@/components/seo/Breadcrumb";
 import { getArticleTags, getPublishedArticles } from "@/lib/column/queries";
-import { siteConfig } from "@/lib/site-config";
+import { buildMetadata } from "@/lib/seo/metadata";
 
 export const revalidate = 3600;
 
@@ -26,12 +26,7 @@ export async function generateMetadata({
   const title = `#${current.name} の記事一覧`;
   const description = `3125株式会社の「${current.name}」タグが付いた記事一覧。`;
 
-  return {
-    title,
-    description,
-    alternates: { canonical: `/column/tag/${tag}` },
-    openGraph: { title: `${title} | ${siteConfig.name}`, description, url: `/column/tag/${tag}` },
-  };
+  return buildMetadata({ title, description, path: `/column/tag/${tag}` });
 }
 
 export default async function ColumnTagPage({

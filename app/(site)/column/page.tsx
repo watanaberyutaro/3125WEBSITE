@@ -3,24 +3,18 @@ import { PageHero } from "@/components/layout/PageHero";
 import { ColumnFilter } from "@/components/column/ColumnFilter";
 import { ArticleList } from "@/components/column/ArticleList";
 import { SearchForm } from "@/components/ui/SearchForm";
+import { Breadcrumb } from "@/components/seo/Breadcrumb";
 import { getArticleCategories, getPublishedArticles } from "@/lib/column/queries";
-import { siteConfig } from "@/lib/site-config";
+import { buildMetadata } from "@/lib/seo/metadata";
 
 const TITLE = "News / Blog";
 const DESCRIPTION = "3125株式会社のお知らせ・ブログ。AI活用・映像・Web制作に関する最新情報をお届けします。";
 
 export const metadata: Metadata = {
-  title: TITLE,
-  description: DESCRIPTION,
+  ...buildMetadata({ title: TITLE, description: DESCRIPTION, path: "/column" }),
   alternates: {
     canonical: "/column",
     types: { "application/rss+xml": "/column/rss.xml" },
-  },
-  openGraph: {
-    title: `${TITLE} | ${siteConfig.name}`,
-    description: DESCRIPTION,
-    url: "/column",
-    images: ["/assets/images/ogp.jpg"],
   },
 };
 
@@ -40,6 +34,7 @@ export default async function ColumnPage({
 
   return (
     <>
+      <Breadcrumb items={[{ name: "Home", path: "/" }, { name: "News", path: "/column" }]} />
       <PageHero
         eyebrowNum="News"
         label="Latest Updates"

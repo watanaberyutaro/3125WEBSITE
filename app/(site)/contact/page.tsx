@@ -3,27 +3,20 @@ import { PageHero } from "@/components/layout/PageHero";
 import { Reveal } from "@/components/motion/Reveal";
 import { LinkArrow } from "@/components/ui/LinkArrow";
 import { ContactForm } from "@/components/contact/ContactForm";
+import { Breadcrumb } from "@/components/seo/Breadcrumb";
 import { siteConfig } from "@/lib/site-config";
+import { buildMetadata } from "@/lib/seo/metadata";
 
 const TITLE = "お問い合わせ";
 const DESCRIPTION =
   "3125株式会社へのお問い合わせ — AIマンツーマン教育・AI導入支援・AI研修・AIコンテンツ制作のご依頼・ご相談はこちらから。まずはお気軽にご連絡ください。";
 
-export const metadata: Metadata = {
-  title: TITLE,
-  description: DESCRIPTION,
-  alternates: { canonical: "/contact" },
-  openGraph: {
-    title: `${TITLE} | ${siteConfig.name}`,
-    description: DESCRIPTION,
-    url: "/contact",
-    images: ["/assets/images/ogp.jpg"],
-  },
-};
+export const metadata: Metadata = buildMetadata({ title: TITLE, description: DESCRIPTION, path: "/contact" });
 
 export default function ContactPage() {
   return (
     <>
+      <Breadcrumb items={[{ name: "Home", path: "/" }, { name: "Contact", path: "/contact" }]} />
       <PageHero
         eyebrowNum="Cntct"
         label="Contact"

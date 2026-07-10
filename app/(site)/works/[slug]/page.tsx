@@ -8,7 +8,7 @@ import { HomeCta } from "@/components/layout/HomeCta";
 import { Reveal } from "@/components/motion/Reveal";
 import { getPublishedWorks, getWorkBySlug } from "@/lib/works/queries";
 import { creativeWorkJsonLd } from "@/lib/seo/jsonld";
-import { siteConfig } from "@/lib/site-config";
+import { buildMetadata } from "@/lib/seo/metadata";
 
 export const revalidate = 3600;
 
@@ -26,25 +26,22 @@ export async function generateMetadata({
   const work = await getWorkBySlug(slug);
   if (!work) return {};
 
-  const title = work.seoTitle ?? `${work.clientName} ${work.projectName}`;
+  const title = `${work.seoTitle ?? `${work.clientName} ${work.projectName}`} | 制作実績`;
   const description =
     work.seoDescription ??
     work.excerpt ??
     work.description?.slice(0, 120) ??
     `${work.clientName}の制作実績。`;
 
-  return {
-    title: `${title} | 制作実績`,
+  return buildMetadata({
+    title,
     description,
-    alternates: { canonical: `/works/${slug}` },
-    openGraph: {
-      type: "article",
-      title: `${title} | 制作実績 | ${siteConfig.name}`,
-      description,
-      url: `/works/${slug}`,
-      images: work.ogImageUrl ? [work.ogImageUrl] : ["/assets/images/ogp.jpg"],
-    },
-  };
+    path: `/works/${slug}`,
+    images: work.ogImageUrl ? [work.ogImageUrl] : undefined,
+    type: "article",
+    publishedTime: work.publishedAt ?? undefined,
+    modifiedTime: work.updatedAt,
+  });
 }
 
 export default async function WorkDetailPage({

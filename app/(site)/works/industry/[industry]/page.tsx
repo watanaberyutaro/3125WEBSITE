@@ -4,7 +4,7 @@ import { PageHero } from "@/components/layout/PageHero";
 import { WorksGrid } from "@/components/works/WorksGrid";
 import { Breadcrumb } from "@/components/seo/Breadcrumb";
 import { getPublishedWorks, getWorkIndustries } from "@/lib/works/queries";
-import { siteConfig } from "@/lib/site-config";
+import { buildMetadata } from "@/lib/seo/metadata";
 
 export const revalidate = 3600;
 
@@ -26,12 +26,7 @@ export async function generateMetadata({
   const title = `${current.name}業界の制作実績`;
   const description = `3125株式会社が手がけた${current.name}業界の制作実績一覧。`;
 
-  return {
-    title,
-    description,
-    alternates: { canonical: `/works/industry/${industry}` },
-    openGraph: { title: `${title} | ${siteConfig.name}`, description, url: `/works/industry/${industry}` },
-  };
+  return buildMetadata({ title, description, path: `/works/industry/${industry}` });
 }
 
 export default async function WorksIndustryPage({

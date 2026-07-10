@@ -21,15 +21,24 @@ const TITLE = "3125株式会社 | AIで、ビジネスを変える。";
 const DESCRIPTION =
   "3125株式会社は、東京・南青山を拠点とするAIエージェンシーです。AIマンツーマン教育・AI導入支援・AI研修を通じて、経営者から現場担当者まで本質的なAI活用を支援します。まずはお気軽にご相談ください。";
 
+const OG_DESCRIPTION =
+  "AIマンツーマン教育・AI導入支援・AI研修を通して、ビジネスのAI活用を支援する。東京・南青山のAIエージェンシー。";
+
 export const metadata: Metadata = {
   title: { absolute: TITLE },
   description: DESCRIPTION,
   alternates: { canonical: "/" },
   openGraph: {
+    type: "website",
     title: TITLE,
-    description:
-      "AIマンツーマン教育・AI導入支援・AI研修を通して、ビジネスのAI活用を支援する。東京・南青山のAIエージェンシー。",
+    description: OG_DESCRIPTION,
     url: "/",
+    images: ["/assets/images/ogp.jpg"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: OG_DESCRIPTION,
     images: ["/assets/images/ogp.jpg"],
   },
 };

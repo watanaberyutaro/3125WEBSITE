@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Shippori_Mincho_B1, DM_Mono, Montserrat } from "next/font/google";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { organizationJsonLd } from "@/lib/seo/jsonld";
@@ -51,6 +51,18 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
   },
+  icons: {
+    icon: [
+      { url: "/assets/images/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/assets/images/favicon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/assets/images/favicon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/assets/images/apple-touch-icon.png",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0F0F0D",
 };
 
 export default function RootLayout({

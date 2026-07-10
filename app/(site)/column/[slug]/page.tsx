@@ -10,7 +10,7 @@ import { RelatedArticles } from "@/components/column/RelatedArticles";
 import { FaqSection } from "@/components/column/FaqSection";
 import { getArticleBySlug, getPublishedArticles } from "@/lib/column/queries";
 import { articleJsonLd } from "@/lib/seo/jsonld";
-import { siteConfig } from "@/lib/site-config";
+import { buildMetadata } from "@/lib/seo/metadata";
 
 export const revalidate = 3600;
 
@@ -29,22 +29,17 @@ export async function generateMetadata({
   if (!article) return {};
 
   const title = article.seoTitle ?? article.title;
-  const description = article.seoDescription ?? article.excerpt ?? `${article.title} | ${siteConfig.name}`;
+  const description = article.seoDescription ?? article.excerpt ?? article.title;
 
-  return {
+  return buildMetadata({
     title,
     description,
-    alternates: { canonical: `/column/${slug}` },
-    openGraph: {
-      type: "article",
-      title: `${title} | ${siteConfig.name}`,
-      description,
-      url: `/column/${slug}`,
-      images: article.ogImageUrl ? [article.ogImageUrl] : ["/assets/images/ogp.jpg"],
-      publishedTime: article.publishedAt ?? undefined,
-      modifiedTime: article.updatedAt,
-    },
-  };
+    path: `/column/${slug}`,
+    images: article.ogImageUrl ? [article.ogImageUrl] : undefined,
+    type: "article",
+    publishedTime: article.publishedAt ?? undefined,
+    modifiedTime: article.updatedAt,
+  });
 }
 
 function formatDate(iso: string | null) {

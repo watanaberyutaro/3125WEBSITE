@@ -5,7 +5,7 @@ import { ColumnFilter } from "@/components/column/ColumnFilter";
 import { ArticleList } from "@/components/column/ArticleList";
 import { Breadcrumb } from "@/components/seo/Breadcrumb";
 import { getArticleCategories, getPublishedArticles } from "@/lib/column/queries";
-import { siteConfig } from "@/lib/site-config";
+import { buildMetadata } from "@/lib/seo/metadata";
 
 export const revalidate = 3600;
 
@@ -27,12 +27,7 @@ export async function generateMetadata({
   const title = `${current.name}一覧`;
   const description = `3125株式会社の${current.name}一覧。`;
 
-  return {
-    title,
-    description,
-    alternates: { canonical: `/column/category/${category}` },
-    openGraph: { title: `${title} | ${siteConfig.name}`, description, url: `/column/category/${category}` },
-  };
+  return buildMetadata({ title, description, path: `/column/category/${category}` });
 }
 
 export default async function ColumnCategoryPage({

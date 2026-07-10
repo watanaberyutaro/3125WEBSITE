@@ -3,23 +3,14 @@ import { PageHero } from "@/components/layout/PageHero";
 import { HomeCta } from "@/components/layout/HomeCta";
 import { Reveal } from "@/components/motion/Reveal";
 import { CtaButton } from "@/components/ui/CtaButton";
-import { siteConfig } from "@/lib/site-config";
+import { Breadcrumb } from "@/components/seo/Breadcrumb";
+import { buildMetadata } from "@/lib/seo/metadata";
 
 const TITLE = "AIマンツーマン教育・AI導入支援・AI研修";
 const DESCRIPTION =
   "3125株式会社のサービス — AIマンツーマン教育・AI導入支援・AI研修・AIコンテンツ制作・映像制作・Web制作。東京・南青山からビジネスのAI活用をトータルサポートします。";
 
-export const metadata: Metadata = {
-  title: TITLE,
-  description: DESCRIPTION,
-  alternates: { canonical: "/services" },
-  openGraph: {
-    title: `${TITLE} | ${siteConfig.name}`,
-    description: DESCRIPTION,
-    url: "/services",
-    images: ["/assets/images/ogp.jpg"],
-  },
-};
+export const metadata: Metadata = buildMetadata({ title: TITLE, description: DESCRIPTION, path: "/services" });
 
 const SERVICES = [
   {
@@ -166,6 +157,7 @@ const SERVICES = [
 export default function ServicesPage() {
   return (
     <>
+      <Breadcrumb items={[{ name: "Home", path: "/" }, { name: "Services", path: "/services" }]} />
       <PageHero
         eyebrowNum="Srv"
         label="Services"

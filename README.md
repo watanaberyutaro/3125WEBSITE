@@ -41,7 +41,7 @@ npm run dev
 - [x] **Phase 3** — Works機能（一覧・詳細・カテゴリ/業種別ページ・検索、Home画面の実績カルーセル）
 - [x] **Phase 4** — Column機能（記事一覧・詳細・目次自動生成・タグ・関連記事・FAQ・RSS、Home画面のお知らせ抜粋）
 - [x] **Phase 5** — お問い合わせフォーム（`/api/contact` + PHPメールブリッジ + reCAPTCHA v3 + Supabase保存。要reCAPTCHAキー設定、下記参照）
-- [ ] **Phase 6** — SEO実装（sitemap/robots/JSON-LD/OGP）
+- [x] **Phase 6** — SEO実装（動的sitemap.xml/robots.txt/manifest、共通metadataヘルパーでcanonical・OGP・Twitter Cardを全ページ統一、Breadcrumb JSON-LDを主要ページへ追加）
 - [ ] **Phase 7** — 管理画面
 - [ ] **Phase 8** — AIツール基盤
 - [ ] **Phase 9** — デプロイ・本番切替
@@ -92,6 +92,14 @@ npm run dev
 
 問い合わせ内容はメール送信の成否に関わらず必ずSupabaseの`inquiries`に保存されるため、
 メールブリッジが一時的に落ちてもリード自体は失われない。
+
+## SEO実装メモ
+
+- `app/sitemap.ts` — 静的ページ＋公開中のworks/articles＋カテゴリ/業種/タグページを動的生成。下書き(status=draft)は含まれない。
+- `app/robots.ts` — `/admin`・`/api`をdisallow、sitemap.xmlを明記。
+- `lib/seo/metadata.ts` — 全ページ共通のmetadata生成ヘルパー。canonical・OGP・Twitter Card（画像を明示指定）を1箇所から一貫して出力する。
+- `components/seo/Breadcrumb.tsx` — 表示とBreadcrumbList JSON-LDを同一データソースから生成（About/Company/Services/Contact/Works/Column の一覧・詳細・カテゴリ・業種・タグページに設置済み）。
+- OGP画像は「実際のカバー画像 → 無ければ `/assets/images/ogp.jpg` の静的フォールバック」という方針。動的OG画像生成(next/og)は、日本語タイトルをレンダリングするには追加のCJKフォント読み込みが必要でedge実行時の安定性リスクがあるため、今回は見送った。
 
 ## 将来対応: 記事の自動生成
 

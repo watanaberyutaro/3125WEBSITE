@@ -5,23 +5,15 @@ import { HomeCta } from "@/components/layout/HomeCta";
 import { Reveal } from "@/components/motion/Reveal";
 import { RevealGrid } from "@/components/motion/RevealGrid";
 import { LinkArrow } from "@/components/ui/LinkArrow";
+import { Breadcrumb } from "@/components/seo/Breadcrumb";
 import { siteConfig } from "@/lib/site-config";
+import { buildMetadata } from "@/lib/seo/metadata";
 
 const TITLE = "AIコンサルティング会社について";
 const DESCRIPTION =
   "3125株式会社について — AIマンツーマン教育・AI導入支援・AI研修を手がけるAIコンサルティング会社。2024年創業、東京・南青山。私たちのフィロソフィーとチームについてご紹介します。";
 
-export const metadata: Metadata = {
-  title: TITLE,
-  description: DESCRIPTION,
-  alternates: { canonical: "/about" },
-  openGraph: {
-    title: `${TITLE} | ${siteConfig.name}`,
-    description: DESCRIPTION,
-    url: "/about",
-    images: ["/assets/images/ogp.jpg"],
-  },
-};
+export const metadata: Metadata = buildMetadata({ title: TITLE, description: DESCRIPTION, path: "/about" });
 
 const TEAM = [
   {
@@ -50,6 +42,7 @@ const TEAM = [
 export default function AboutPage() {
   return (
     <>
+      <Breadcrumb items={[{ name: "Home", path: "/" }, { name: "About", path: "/about" }]} />
       <PageHero
         eyebrowNum="About"
         label="About Us"
