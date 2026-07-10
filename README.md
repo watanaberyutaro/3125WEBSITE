@@ -35,7 +35,7 @@ npm run dev
 
 - [x] **Phase 0** — プロジェクト基盤構築
 - [x] **Phase 1** — 共通レイアウト・デザイントークン・静的ページ（About/Company/Services/Contact/Home）
-- [ ] **Phase 2** — Supabaseスキーマ・移行スクリプト
+- [x] **Phase 2** — Supabaseスキーマ・移行スクリプト（本番Supabaseプロジェクトに適用済み、works 7件・articles 1件を移行済み）
 - [ ] **Phase 3** — Works機能
 - [ ] **Phase 4** — Column機能（SEO記事）
 - [ ] **Phase 5** — お問い合わせフォーム
@@ -49,3 +49,16 @@ npm run dev
 `public/assets/images/` は旧サイト（`HP/assets/images/`）と同一のファイル名・パスで配置している。
 既存の被リンク・検索エンジンのインデックスに影響を与えないため、これらのURLは変更しない。
 新規にアップロードする画像のみSupabase Storageで管理する。
+
+## Supabase運用
+
+- テーブル定義は `supabase/migrations/*.sql` が正（スキーマ変更は必ずここに新しいマイグレーションファイルを追加する形で行う）。
+- ローカルから本番プロジェクトへ適用する場合:
+  ```bash
+  export SUPABASE_ACCESS_TOKEN=<Personal Access Token>  # supabase.com/dashboard/account/tokens
+  supabase link --project-ref sywbfehsfzdqcfkxohga
+  supabase db push
+  npm run db:types   # 型を再生成
+  ```
+- `categories` は `kind` 列（`work_category` / `work_industry` / `article_category`）でwork/article共通のタクソノミーを1テーブルにまとめている。
+- `inquiries` / `tool_leads` は匿名からの読み書きを一切許可していない（RLSは有効だがポリシー無し）。書き込みは必ずRoute Handlerがservice role keyで行う。
