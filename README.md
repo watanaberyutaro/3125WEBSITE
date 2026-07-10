@@ -43,7 +43,7 @@ npm run dev
 - [x] **Phase 5** — お問い合わせフォーム（`/api/contact` + PHPメールブリッジ + reCAPTCHA v3 + Supabase保存。要reCAPTCHAキー設定、下記参照）
 - [x] **Phase 6** — SEO実装（動的sitemap.xml/robots.txt/manifest、共通metadataヘルパーでcanonical・OGP・Twitter Cardを全ページ統一、Breadcrumb JSON-LDを主要ページへ追加）
 - [x] **Phase 7** — 管理画面（Supabase Auth認証・middleware+layoutの二重ガード・works/articles/categories CRUD・お問い合わせ一覧・画像アップロード。ログインは旧サイトと同一の`info@3125.jp`）
-- [ ] **Phase 8** — AIツール基盤
+- [x] **Phase 8** — AIツール基盤（`/tools`一覧・`/tools/[slug]`・`/api/tools/[tool]`。ルールベース生成の5ツール: 料金シミュレーター・SEOタイトル生成・メタディスクリプション生成・FAQ生成・CTA生成。利用ログは`tool_leads`に記録、管理画面から閲覧可能）
 - [ ] **Phase 9** — デプロイ・本番切替
 
 ## 画像パスについて
@@ -107,6 +107,15 @@ npm run dev
 - 認可は二重構成: `middleware.ts`（`/admin/:path*`でセッション有無を検査）→ `app/admin/(protected)/layout.tsx`（`requireStaff()`で`profiles.role`まで確認）。ログインページのみ`(protected)`route groupの外に置き、認証必須レイアウトの対象から除外している。
 - Works/Articles/Categories/お問い合わせのCRUDをServer Actions（`lib/admin/*-actions.ts`）で実装。編集フォームは`.bind()`でIDを渡さず、hidden inputでFormDataに含めて渡す方式にしている（後述の理由）。
 - **スラッグは必ずASCII英数字のみ**（`lib/admin/slug.ts`の`slugify()`）。日本語のみの入力は乱数スラッグにフォールバックする。これはUI都合ではなく実際のクラッシュを踏んで判明した制約: `updateWork`/`updateArticle`が呼ぶ`revalidatePath(`/works/${slug}`)`にASCII外の文字を含むパスを渡すと、Next.js内部のキャッシュ再検証処理がHeaders相当の値としてこれを扱おうとして`TypeError: Cannot convert argument to a ByteString`で500になる（Next.js 15.5.20で確認）。スラッグ欄を手入力する場合も同様にASCIIのみにすること。
+
+## AIツール基盤（Phase 8）
+
+- 実体はコードで管理する「レジストリ」1つ: `lib/tools/registry.ts` の `TOOLS` 配列に `lib/tools/definitions/*.ts` のツール定義を登録するだけで、`/tools`一覧・`/tools/[slug]`詳細・`/api/tools/[tool]`・`sitemap.xml`のすべてに自動反映される。100個規模に増えてもこの配列に追加する以外の変更は不要な設計。
+- 各ツール定義（`ToolDefinition`型、`lib/tools/types.ts`）は「フォーム項目定義（fields）＋Zodスキーマ（schema）＋純粋関数の生成ロジック（run）」の3点セット。外部LLM APIは使わず、すべてルールベース（テンプレート・計算式）で生成する方針（キー管理・API費用・レイテンシが発生しないため）。
+- UIは `components/tools/ToolForm.tsx`（fieldsから汎用的にフォームを描画）と `components/tools/ToolResult.tsx`（`ToolOutput`の型に応じて結果を描画）の2つが全ツール共通。ツールを追加してもコンポーネント側の実装は不要。
+- `/tools/[slug]`は`generateStaticParams`でSSG（レジストリがコード配列でDB依存が無いため）。
+- 利用ログは全ツール共通の`tool_leads`テーブルへ`/api/tools/[tool]`（service role key使用のRoute Handler）が記録する。メールアドレスは任意項目として将来追加可能（現状のツールには未設置）。管理画面の「AIツール利用ログ」でツール名付きで閲覧できる。
+- 現在実装済みの5ツール: 料金シミュレーター・SEOタイトル生成・メタディスクリプション生成・FAQ生成・CTA生成。
 
 ## 将来対応: 記事の自動生成
 

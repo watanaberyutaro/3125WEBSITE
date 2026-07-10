@@ -500,6 +500,8 @@
 /* 旧サイトCSSには存在しなかったルール。6番目の項目(Contact CTA)が
    モバイルメニューで永久にopacity:0のまま操作不能になるバグを修正。 */
 .mobile-menu.open .mm__item:nth-child(6) .mm__item-inner { opacity: 1; visibility: visible; transform: translateY(0); transition-delay: 1800ms; }
+/* Phase 8でナビに「AIツール」を追加し項目が7個になったため同様に追加。 */
+.mobile-menu.open .mm__item:nth-child(7) .mm__item-inner { opacity: 1; visibility: visible; transform: translateY(0); transition-delay: 1880ms; }
 
 /* Number labels — hidden */
 .mm__num { display: none; }
@@ -1946,6 +1948,217 @@
   line-height: 1.7;
 }
 
+/* ────────────────────────────────────────────────────────────────
+   21b. TOOLS（Phase 8で追加。work-cardの構造・トーンを流用しつつ
+   画像サムネイルの無いテキストのみのカードとして再構成）
+──────────────────────────────────────────────────────────────── */
+.tools-grid {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.tool-card {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  padding: 32px 28px 28px;
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.35s var(--ease), transform 0.35s var(--ease), background 0.35s;
+}
+
+.tool-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--green);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.45s var(--ease);
+}
+
+.tool-card:hover {
+  border-color: var(--line-green);
+  transform: translateY(-3px);
+  background: var(--green-4);
+}
+.tool-card:hover::before { transform: scaleY(1); }
+
+.tool-card__num {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 18px;
+}
+
+.tool-card__name {
+  font-family: var(--font-jp);
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.tool-card__desc {
+  font-family: var(--font-jp);
+  font-size: 0.82rem;
+  line-height: 1.8;
+  color: var(--text-2);
+  flex: 1;
+  margin-bottom: 20px;
+}
+
+.tool-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  margin-top: auto;
+}
+
+.tool-card__label {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green);
+  background: var(--green-4);
+  border: 1px solid var(--green-3);
+  padding: 4px 10px;
+}
+
+.tool-card__arrow {
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--text-4);
+  transition: color 0.2s, transform 0.3s var(--ease);
+}
+.tool-card:hover .tool-card__arrow { color: var(--green); transform: translateX(5px); }
+
+/* Tool detail page — form + result, single centered column */
+.tool-layout {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.tool-panel { display: flex; flex-direction: column; gap: 40px; }
+
+.tool-panel__error { color: #b3432b; }
+
+.tool-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tool-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-jp);
+  font-size: 0.86rem;
+  color: var(--text-2);
+}
+
+.tool-checkbox input { accent-color: var(--green); width: 16px; height: 16px; }
+
+.tool-result {
+  background: var(--green-4);
+  border: 1px solid var(--line-green);
+  padding: 28px;
+}
+
+.tool-result__title {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 18px;
+}
+
+.tool-result__summary,
+.tool-result__note {
+  font-family: var(--font-jp);
+  font-size: 0.82rem;
+  color: var(--text-2);
+  line-height: 1.8;
+}
+
+.tool-result__price {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.tool-result__price-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  margin-left: 8px;
+}
+
+.tool-result__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.tool-result__list li {
+  font-family: var(--font-jp);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--text);
+  padding: 12px 16px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+}
+
+.tool-result__qa {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.tool-result__qa-item {
+  padding: 14px 16px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+}
+
+.tool-result__qa-item dt {
+  font-family: var(--font-jp);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.tool-result__qa-item dd {
+  font-family: var(--font-jp);
+  font-size: 0.84rem;
+  color: var(--text-2);
+  line-height: 1.75;
+}
+
+.tool-result__note { margin-top: 4px; }
+
 
 /* ────────────────────────────────────────────────────────────────
    22. RESPONSIVE
@@ -1955,6 +2168,7 @@
 
   .service-grid            { grid-template-columns: repeat(2, 1fr); }
   .works-grid              { grid-template-columns: repeat(2, 1fr); }
+  .tools-grid               { grid-template-columns: repeat(2, 1fr); }
   .company-layout          { grid-template-columns: 1fr; gap: 52px; }
   .contact-layout          { grid-template-columns: 1fr; gap: 52px; }
   .concept-panels          { grid-template-columns: 1fr; }
@@ -1973,6 +2187,7 @@
 
   /* GRIDS → 1 column */
   .works-grid    { grid-template-columns: 1fr !important; }
+  .tools-grid    { grid-template-columns: 1fr !important; }
   .service-grid  { grid-template-columns: 1fr; }
   .team-grid     { grid-template-columns: 1fr; }
   .form-row      { grid-template-columns: 1fr; }

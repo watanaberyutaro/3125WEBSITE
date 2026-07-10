@@ -88,6 +88,20 @@ export function faqJsonLd(faq: { question: string; answer: string }[]) {
   };
 }
 
+export function toolJsonLd(tool: { name: string; description: string; slug: string }) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: tool.name,
+    description: tool.description,
+    url: `${siteConfig.url}/tools/${tool.slug}`,
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Any",
+    offers: { "@type": "Offer", price: "0", priceCurrency: "JPY" },
+    provider: { "@type": "Organization", name: siteConfig.name },
+  };
+}
+
 export function creativeWorkJsonLd(work: {
   clientName: string;
   projectName: string;

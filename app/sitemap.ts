@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { siteConfig } from "@/lib/site-config";
 import { getPublishedWorks, getWorkCategories, getWorkIndustries } from "@/lib/works/queries";
 import { getArticleCategories, getArticleTags, getPublishedArticles } from "@/lib/column/queries";
+import { TOOLS } from "@/lib/tools/registry";
 
 export const revalidate = 3600;
 
@@ -11,6 +12,7 @@ const STATIC_ROUTES: { path: string; changeFrequency: MetadataRoute.Sitemap[numb
   { path: "/services", changeFrequency: "monthly", priority: 0.9 },
   { path: "/works", changeFrequency: "weekly", priority: 0.8 },
   { path: "/column", changeFrequency: "daily", priority: 0.7 },
+  { path: "/tools", changeFrequency: "monthly", priority: 0.7 },
   { path: "/company", changeFrequency: "monthly", priority: 0.7 },
   { path: "/contact", changeFrequency: "monthly", priority: 0.8 },
 ];
@@ -69,6 +71,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.4,
   }));
 
+  const toolEntries: MetadataRoute.Sitemap = TOOLS.map((t) => ({
+    url: `${siteConfig.url}/tools/${t.slug}`,
+    changeFrequency: "monthly",
+    priority: 0.6,
+  }));
+
   return [
     ...staticEntries,
     ...workEntries,
@@ -77,5 +85,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...articleEntries,
     ...articleCategoryEntries,
     ...articleTagEntries,
+    ...toolEntries,
   ];
 }
