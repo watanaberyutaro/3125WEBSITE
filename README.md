@@ -42,7 +42,7 @@ npm run dev
 - [x] **Phase 4** — Column機能（記事一覧・詳細・目次自動生成・タグ・関連記事・FAQ・RSS、Home画面のお知らせ抜粋）
 - [x] **Phase 5** — お問い合わせフォーム（`/api/contact` + PHPメールブリッジ + reCAPTCHA v3 + Supabase保存。要reCAPTCHAキー設定、下記参照）
 - [x] **Phase 6** — SEO実装（動的sitemap.xml/robots.txt/manifest、共通metadataヘルパーでcanonical・OGP・Twitter Cardを全ページ統一、Breadcrumb JSON-LDを主要ページへ追加）
-- [ ] **Phase 7** — 管理画面
+- [x] **Phase 7** — 管理画面（Supabase Auth認証・middleware+layoutの二重ガード・works/articles/categories CRUD・お問い合わせ一覧・画像アップロード。ログインは旧サイトと同一の`info@3125.jp`）
 - [ ] **Phase 8** — AIツール基盤
 - [ ] **Phase 9** — デプロイ・本番切替
 
@@ -100,6 +100,13 @@ npm run dev
 - `lib/seo/metadata.ts` — 全ページ共通のmetadata生成ヘルパー。canonical・OGP・Twitter Card（画像を明示指定）を1箇所から一貫して出力する。
 - `components/seo/Breadcrumb.tsx` — 表示とBreadcrumbList JSON-LDを同一データソースから生成（About/Company/Services/Contact/Works/Column の一覧・詳細・カテゴリ・業種・タグページに設置済み）。
 - OGP画像は「実際のカバー画像 → 無ければ `/assets/images/ogp.jpg` の静的フォールバック」という方針。動的OG画像生成(next/og)は、日本語タイトルをレンダリングするには追加のCJKフォント読み込みが必要でedge実行時の安定性リスクがあるため、今回は見送った。
+
+## 管理画面（Phase 7）
+
+- `/admin/login` でログイン。旧サイトの管理画面と同一の認証情報（`info@3125.jp` / 旧サイトと同じパスワード）をそのままSupabase Authのユーザーとして作成している（`scripts/create-admin.ts`）。
+- 認可は二重構成: `middleware.ts`（`/admin/:path*`でセッション有無を検査）→ `app/admin/(protected)/layout.tsx`（`requireStaff()`で`profiles.role`まで確認）。ログインページのみ`(protected)`route groupの外に置き、認証必須レイアウトの対象から除外している。
+- Works/Articles/Categories/お問い合わせのCRUDをServer Actions（`lib/admin/*-actions.ts`）で実装。編集フォームは`.bind()`でIDを渡さず、hidden inputでFormDataに含めて渡す方式にしている（後述の理由）。
+- **スラッグは必ずASCII英数字のみ**（`lib/admin/slug.ts`の`slugify()`）。日本語のみの入力は乱数スラッグにフォールバックする。これはUI都合ではなく実際のクラッシュを踏んで判明した制約: `updateWork`/`updateArticle`が呼ぶ`revalidatePath(`/works/${slug}`)`にASCII外の文字を含むパスを渡すと、Next.js内部のキャッシュ再検証処理がHeaders相当の値としてこれを扱おうとして`TypeError: Cannot convert argument to a ByteString`で500になる（Next.js 15.5.20で確認）。スラッグ欄を手入力する場合も同様にASCIIのみにすること。
 
 ## 将来対応: 記事の自動生成
 
