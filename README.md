@@ -44,7 +44,7 @@ npm run dev
 - [x] **Phase 6** — SEO実装（動的sitemap.xml/robots.txt/manifest、共通metadataヘルパーでcanonical・OGP・Twitter Cardを全ページ統一、Breadcrumb JSON-LDを主要ページへ追加）
 - [x] **Phase 7** — 管理画面（Supabase Auth認証・middleware+layoutの二重ガード・works/articles/categories CRUD・お問い合わせ一覧・画像アップロード。ログインは旧サイトと同一の`info@3125.jp`）
 - [x] **Phase 8** — AIツール基盤（`/tools`一覧・`/tools/[slug]`・`/api/tools/[tool]`。ルールベース生成の5ツール: 料金シミュレーター・SEOタイトル生成・メタディスクリプション生成・FAQ生成・CTA生成。利用ログは`tool_leads`に記録、管理画面から閲覧可能）
-- [ ] **Phase 9** — デプロイ・本番切替
+- [x] **Phase 9** — デプロイ・本番切替（Vercelへデプロイ、`3125.jp`/`www.3125.jp`のDNSをVercelへ切替済み。旧サイト所有の`legacy.3125.jp`をさくらのレンタルサーバー上に追加しPHPメールブリッジの安定URLとして使用。サイトマップ全32URL・旧URLリダイレクト・お問い合わせフォーム・AIツールを本番で検証済み）
 
 ## 画像パスについて
 
