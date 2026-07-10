@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="#0F0F0D"/>
+  <!-- Green accent bar -->
+  <rect x="48" y="340" width="416" height="6" rx="3" fill="#2A6E4B"/>
+  <!-- "3125" text -->
+  <text
+    x="256"
+    y="310"
+    font-family="'Helvetica Neue', 'Arial', sans-serif"
+    font-weight="800"
+    font-size="210"
+    fill="#FAFAF8"
+    text-anchor="middle"
+    letter-spacing="-8"
+  >3125</text>
+</svg>
