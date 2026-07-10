@@ -38,7 +38,7 @@ npm run dev
 - [x] **Phase 2** — Supabaseスキーマ・移行スクリプト（本番Supabaseプロジェクトに適用済み、works 7件・articles 1件を移行済み）
 - [x] **Phase 3** — Works機能（一覧・詳細・カテゴリ/業種別ページ・検索、Home画面の実績カルーセル）
 - [x] **Phase 4** — Column機能（記事一覧・詳細・目次自動生成・タグ・関連記事・FAQ・RSS、Home画面のお知らせ抜粋）
-- [ ] **Phase 5** — お問い合わせフォーム
+- [x] **Phase 5** — お問い合わせフォーム（`/api/contact` + Resend + reCAPTCHA v3 + Supabase保存。要APIキー設定、下記参照）
 - [ ] **Phase 6** — SEO実装（sitemap/robots/JSON-LD/OGP）
 - [ ] **Phase 7** — 管理画面
 - [ ] **Phase 8** — AIツール基盤
@@ -62,6 +62,18 @@ npm run dev
   ```
 - `categories` は `kind` 列（`work_category` / `work_industry` / `article_category`）でwork/article共通のタクソノミーを1テーブルにまとめている。
 - `inquiries` / `tool_leads` は匿名からの読み書きを一切許可していない（RLSは有効だがポリシー無し）。書き込みは必ずRoute Handlerがservice role keyで行う。
+
+## お問い合わせフォームの有効化
+
+`.env.local` に以下を設定しないと、フォーム送信は「DBへの保存」までは成功するが
+メール通知は失敗する（`RESEND_API_KEY`未設定時は明示的にエラーを返す設計）。
+
+- `RESEND_API_KEY` — https://resend.com/api-keys で発行。加えて送信元ドメイン
+  `3125.jp` を Resend の Domains 設定でDNS認証しないと、`no-reply@3125.jp` /
+  `info@3125.jp` からの送信自体が拒否される。
+- `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` / `RECAPTCHA_SECRET_KEY` — https://www.google.com/recaptcha/admin
+  でv3のサイトを登録して発行。未設定の場合はreCAPTCHA検証自体をスキップする
+  （開発中にフォームが使えなくならないための措置。本番運用前に必ず設定すること）。
 
 ## 将来対応: 記事の自動生成
 
