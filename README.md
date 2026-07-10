@@ -33,8 +33,8 @@ npm run dev
 
 このプロジェクトはフェーズごとに実装している。各フェーズの詳細はコミット履歴・タスクリストを参照。
 
-- [x] **Phase 0** — プロジェクト基盤構築（このコミット）
-- [ ] **Phase 1** — 共通レイアウト・デザイントークン・静的ページ
+- [x] **Phase 0** — プロジェクト基盤構築
+- [x] **Phase 1** — 共通レイアウト・デザイントークン・静的ページ（About/Company/Services/Contact/Home）
 - [ ] **Phase 2** — Supabaseスキーマ・移行スクリプト
 - [ ] **Phase 3** — Works機能
 - [ ] **Phase 4** — Column機能（SEO記事）
