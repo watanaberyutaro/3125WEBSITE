@@ -1,20 +1,22 @@
 # 3125.jp — Next.js版
 
 3125株式会社コーポレートサイトのPHP → Next.js(App Router)移行プロジェクト。
-アーキテクチャ全体の設計背景は移行元リポジトリでの検討セッションを参照（Supabase/Vercel/Resend構成、CMS・AIツール拡張基盤の設計方針）。
+アーキテクチャ全体の設計背景は移行元リポジトリでの検討セッションを参照
+（Supabase/Vercel構成、CMS・AIツール拡張基盤の設計方針。メール送信は
+外部サービスを使わず既存PHPホスティングを使い続ける方針に変更済み）。
 
 ## スタック
 
 - Next.js 15 (App Router) / TypeScript / Tailwind CSS v4
 - Supabase (Postgres / Auth / Storage)
-- Resend（メール送信）/ reCAPTCHA v3
+- 既存PHPホスティング（メール送信専用ブリッジ）/ reCAPTCHA v3
 - Vercel（ホスティング・CI/CD）
 
 ## セットアップ
 
 ```bash
 npm install
-cp .env.local.example .env.local   # 値を埋める（Supabase/Resend/reCAPTCHA）
+cp .env.local.example .env.local   # 値を埋める（Supabase/メールブリッジ/reCAPTCHA）
 npm run dev
 ```
 
@@ -38,7 +40,7 @@ npm run dev
 - [x] **Phase 2** — Supabaseスキーマ・移行スクリプト（本番Supabaseプロジェクトに適用済み、works 7件・articles 1件を移行済み）
 - [x] **Phase 3** — Works機能（一覧・詳細・カテゴリ/業種別ページ・検索、Home画面の実績カルーセル）
 - [x] **Phase 4** — Column機能（記事一覧・詳細・目次自動生成・タグ・関連記事・FAQ・RSS、Home画面のお知らせ抜粋）
-- [x] **Phase 5** — お問い合わせフォーム（`/api/contact` + Resend + reCAPTCHA v3 + Supabase保存。要APIキー設定、下記参照）
+- [x] **Phase 5** — お問い合わせフォーム（`/api/contact` + PHPメールブリッジ + reCAPTCHA v3 + Supabase保存。要reCAPTCHAキー設定、下記参照）
 - [ ] **Phase 6** — SEO実装（sitemap/robots/JSON-LD/OGP）
 - [ ] **Phase 7** — 管理画面
 - [ ] **Phase 8** — AIツール基盤
@@ -63,17 +65,33 @@ npm run dev
 - `categories` は `kind` 列（`work_category` / `work_industry` / `article_category`）でwork/article共通のタクソノミーを1テーブルにまとめている。
 - `inquiries` / `tool_leads` は匿名からの読み書きを一切許可していない（RLSは有効だがポリシー無し）。書き込みは必ずRoute Handlerがservice role keyで行う。
 
-## お問い合わせフォームの有効化
+## お問い合わせフォームの有効化・メール送信の仕組み
 
-`.env.local` に以下を設定しないと、フォーム送信は「DBへの保存」までは成功するが
-メール通知は失敗する（`RESEND_API_KEY`未設定時は明示的にエラーを返す設計）。
+外部メール配信サービス（Resend等）は使わず、既存PHPホスティングの
+`mb_send_mail()` をそのまま使い続ける方針。構成は以下の通り:
 
-- `RESEND_API_KEY` — https://resend.com/api-keys で発行。加えて送信元ドメイン
-  `3125.jp` を Resend の Domains 設定でDNS認証しないと、`no-reply@3125.jp` /
-  `info@3125.jp` からの送信自体が拒否される。
-- `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` / `RECAPTCHA_SECRET_KEY` — https://www.google.com/recaptcha/admin
-  でv3のサイトを登録して発行。未設定の場合はreCAPTCHA検証自体をスキップする
-  （開発中にフォームが使えなくならないための措置。本番運用前に必ず設定すること）。
+```
+ブラウザ → Next.js /api/contact（バリデーション・reCAPTCHA検証・Supabase保存）
+        → HP/api/send-mail.php（サーバー間通信・メール送信のみ担当）
+        → mb_send_mail()
+```
+
+**本番へのデプロイ手順:**
+1. `HP/api/send-mail.php` を既存PHPホスティングへアップロード（他のPHP修正と同様、FTP等で）
+2. `.env.local`（およびVercelの環境変数）に以下を設定:
+   - `MAIL_BRIDGE_URL` — 例: `https://3125.jp/api/send-mail.php`
+     ⚠️ **Phase 9で本番ドメインをVercelへ切り替えると、`3125.jp` はNext.js側を
+     指すようになりこのURLが壊れる。** 切替前に、PHPホスティング専用の
+     サブドメイン（例: `legacy-mail.3125.jp`）等、ドメイン切替の影響を受けない
+     安定したURLに変更しておくこと。
+   - `MAIL_BRIDGE_SECRET` — `HP/api/send-mail.php` 内の `MAIL_BRIDGE_SECRET`
+     定数と同じ文字列にする（サーバー間通信の認証用共有シークレット）。
+3. `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` / `RECAPTCHA_SECRET_KEY` — https://www.google.com/recaptcha/admin
+   でv3のサイトを登録して発行。未設定の場合はreCAPTCHA検証自体をスキップする
+   （開発中にフォームが使えなくならないための措置。本番運用前に必ず設定すること）。
+
+問い合わせ内容はメール送信の成否に関わらず必ずSupabaseの`inquiries`に保存されるため、
+メールブリッジが一時的に落ちてもリード自体は失われない。
 
 ## 将来対応: 記事の自動生成
 

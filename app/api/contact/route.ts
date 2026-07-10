@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getResendClient } from "@/lib/resend";
 import { verifyRecaptcha } from "@/lib/recaptcha";
-import { buildAdminEmail, buildReplyEmail } from "@/lib/contact/emails";
+import { sendContactMail } from "@/lib/mail-bridge";
 
 export const runtime = "nodejs";
 
@@ -17,10 +16,6 @@ const ContactSchema = z.object({
   message: z.string().trim().min(1, "メッセージは必須です"),
   recaptchaToken: z.string().optional().default(""),
 });
-
-const ADMIN_TO = process.env.CONTACT_TO_EMAIL || "info@3125.jp";
-const FROM_ADMIN = "3125ウェブサイト <no-reply@3125.jp>";
-const FROM_REPLY = "3125株式会社 <info@3125.jp>";
 
 export async function POST(req: Request) {
   let body: Record<string, string>;
@@ -66,7 +61,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const submission = {
+  const mailResult = await sendContactMail({
     name: data.name,
     company: data.company,
     email: data.email,
@@ -74,26 +69,12 @@ export async function POST(req: Request) {
     inquiry: data.inquiry,
     budget: data.budget,
     message: data.message,
-  };
+  });
 
-  try {
-    const resend = getResendClient();
-    const adminEmail = buildAdminEmail(submission);
-    await resend.emails.send({
-      from: FROM_ADMIN,
-      to: ADMIN_TO,
-      replyTo: `${data.name} <${data.email}>`,
-      subject: adminEmail.subject,
-      text: adminEmail.text,
-    });
-
-    // 自動返信の失敗は問い合わせ自体の成功を妨げない(管理者宛は届いているため)
-    const replyEmail = buildReplyEmail(submission);
-    await resend.emails
-      .send({ from: FROM_REPLY, to: data.email, subject: replyEmail.subject, text: replyEmail.text })
-      .catch((err) => console.error("auto-reply email failed:", err));
-  } catch (err) {
-    console.error("admin notification email failed:", err);
+  if (!mailResult.ok) {
+    // inquiriesへの保存は既に成功しているため、リード自体は失われていない。
+    // メール未達のみユーザーへ通知し、直接連絡を促す。
+    console.error("contact mail bridge failed:", mailResult.error);
     return NextResponse.json(
       { ok: false, error: "メールの送信に失敗しました。お手数ですが info@3125.jp へ直接ご連絡ください。" },
       { status: 500 },
