@@ -10,7 +10,9 @@ import { ArrowIcon } from "@/components/ui/ArrowIcon";
 import { CtaButton } from "@/components/ui/CtaButton";
 import { LinkArrow } from "@/components/ui/LinkArrow";
 import { WorksCarousel } from "@/components/works/WorksCarousel";
+import { HomeNewsList } from "@/components/column/HomeNewsList";
 import { getPublishedWorks } from "@/lib/works/queries";
+import { getPublishedArticles } from "@/lib/column/queries";
 import { siteConfig } from "@/lib/site-config";
 
 export const revalidate = 3600;
@@ -126,7 +128,10 @@ const SERVICES = [
 ];
 
 export default async function HomePage() {
-  const works = await getPublishedWorks();
+  const [works, latestNews] = await Promise.all([
+    getPublishedWorks(),
+    getPublishedArticles().then((articles) => articles.slice(0, 5)),
+  ]);
   const carouselWorks = [...works].sort((a, b) => b.sortOrder - a.sortOrder).slice(0, 7);
 
   return (
@@ -228,11 +233,12 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/*
-        News（お知らせ）セクションはPhase 4でColumn機能実装後に追加する。
-        旧サイトの `if (!empty($latest_news))` と同様、データソースが無い状態で
-        リンク先の無いセクションは表示しない方針。
-      */}
+      {latestNews.length > 0 && (
+        <section className="section section--dark hn" aria-labelledby="news-home-heading">
+          <SectionHeaderRow num="03" label="News & Blog" title="お知らせ" moreHref="/column" id="news-home-heading" />
+          <HomeNewsList articles={latestNews} />
+        </section>
+      )}
 
       <HomeCta
         bg="dark"

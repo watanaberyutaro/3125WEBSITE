@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { PageHero } from "@/components/layout/PageHero";
 import { WorksFilter } from "@/components/works/WorksFilter";
-import { WorksSearch } from "@/components/works/WorksSearch";
+import { SearchForm } from "@/components/ui/SearchForm";
 import { WorksGrid } from "@/components/works/WorksGrid";
 import { getPublishedWorks, getWorkCategories } from "@/lib/works/queries";
 import { siteConfig } from "@/lib/site-config";
@@ -48,7 +48,7 @@ export default async function WorksPage({
       />
 
       <section className="section section--dark" aria-label="制作実績一覧">
-        <WorksSearch defaultValue={q ?? ""} />
+        <SearchForm basePath="/works" defaultValue={q ?? ""} placeholder="クライアント名・案件名で検索" label="実績を検索" />
         <WorksFilter categories={categories} activeCategory={category} currentQuery={q} />
         <WorksGrid works={works} />
       </section>
