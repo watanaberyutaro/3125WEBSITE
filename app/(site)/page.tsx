@@ -9,7 +9,11 @@ import { RevealGrid } from "@/components/motion/RevealGrid";
 import { ArrowIcon } from "@/components/ui/ArrowIcon";
 import { CtaButton } from "@/components/ui/CtaButton";
 import { LinkArrow } from "@/components/ui/LinkArrow";
+import { WorksCarousel } from "@/components/works/WorksCarousel";
+import { getPublishedWorks } from "@/lib/works/queries";
 import { siteConfig } from "@/lib/site-config";
+
+export const revalidate = 3600;
 
 const TITLE = "3125株式会社 | AIで、ビジネスを変える。";
 const DESCRIPTION =
@@ -121,7 +125,10 @@ const SERVICES = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const works = await getPublishedWorks();
+  const carouselWorks = [...works].sort((a, b) => b.sortOrder - a.sortOrder).slice(0, 7);
+
   return (
     <>
       <Loader />
@@ -214,10 +221,17 @@ export default function HomePage() {
         </RevealGrid>
       </section>
 
+      {carouselWorks.length > 0 && (
+        <section className="section section--dark3" aria-labelledby="works-heading">
+          <SectionHeaderRow num="02" label="Works" title="制作実績" moreHref="/works" id="works-heading" />
+          <WorksCarousel works={carouselWorks} />
+        </section>
+      )}
+
       {/*
-        Works（制作実績カルーセル）・News（お知らせ）セクションはPhase 3/4で
-        Supabase接続後に追加する。旧サイトの `if (!empty($latest_news))` と同様、
-        データソースが無い状態でリンク先の無いセクションは表示しない方針。
+        News（お知らせ）セクションはPhase 4でColumn機能実装後に追加する。
+        旧サイトの `if (!empty($latest_news))` と同様、データソースが無い状態で
+        リンク先の無いセクションは表示しない方針。
       */}
 
       <HomeCta

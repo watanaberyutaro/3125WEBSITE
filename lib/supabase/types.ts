@@ -277,6 +277,7 @@ export type Database = {
       works: {
         Row: {
           category_id: string | null
+          category_label: string | null
           client_name: string
           cover_image_path: string | null
           created_at: string
@@ -289,16 +290,19 @@ export type Database = {
           og_image_path: string | null
           project_name: string
           published_at: string | null
+          scope: string | null
           seo_description: string | null
           seo_title: string | null
           slug: string
           sort_order: number
           status: string
+          tags: string[]
           updated_at: string
           year: string | null
         }
         Insert: {
           category_id?: string | null
+          category_label?: string | null
           client_name: string
           cover_image_path?: string | null
           created_at?: string
@@ -311,16 +315,19 @@ export type Database = {
           og_image_path?: string | null
           project_name: string
           published_at?: string | null
+          scope?: string | null
           seo_description?: string | null
           seo_title?: string | null
           slug: string
           sort_order?: number
           status?: string
+          tags?: string[]
           updated_at?: string
           year?: string | null
         }
         Update: {
           category_id?: string | null
+          category_label?: string | null
           client_name?: string
           cover_image_path?: string | null
           created_at?: string
@@ -333,11 +340,13 @@ export type Database = {
           og_image_path?: string | null
           project_name?: string
           published_at?: string | null
+          scope?: string | null
           seo_description?: string | null
           seo_title?: string | null
           slug?: string
           sort_order?: number
           status?: string
+          tags?: string[]
           updated_at?: string
           year?: string | null
         }

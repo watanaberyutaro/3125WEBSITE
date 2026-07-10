@@ -36,7 +36,7 @@ npm run dev
 - [x] **Phase 0** — プロジェクト基盤構築
 - [x] **Phase 1** — 共通レイアウト・デザイントークン・静的ページ（About/Company/Services/Contact/Home）
 - [x] **Phase 2** — Supabaseスキーマ・移行スクリプト（本番Supabaseプロジェクトに適用済み、works 7件・articles 1件を移行済み）
-- [ ] **Phase 3** — Works機能
+- [x] **Phase 3** — Works機能（一覧・詳細・カテゴリ/業種別ページ・検索、Home画面の実績カルーセル）
 - [ ] **Phase 4** — Column機能（SEO記事）
 - [ ] **Phase 5** — お問い合わせフォーム
 - [ ] **Phase 6** — SEO実装（sitemap/robots/JSON-LD/OGP）
