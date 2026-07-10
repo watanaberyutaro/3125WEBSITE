@@ -71,10 +71,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja">
-      <body
-        className={`${cormorant.variable} ${shippori.variable} ${dmMono.variable} ${montserrat.variable} antialiased`}
-      >
+    <html
+      lang="ja"
+      className={`${cormorant.variable} ${shippori.variable} ${dmMono.variable} ${montserrat.variable}`}
+    >
+      <body className="antialiased">
         <JsonLd data={organizationJsonLd()} />
         {children}
       </body>
