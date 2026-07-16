@@ -50,7 +50,7 @@ export default async function AdminDashboardPage() {
             className="flex flex-col gap-2 border border-line p-5 transition-colors hover:border-green"
           >
             <span className="font-mono text-[10px] tracking-[0.08em] text-text-3 uppercase">{c.label}</span>
-            <span className="font-display text-3xl font-bold text-text">{c.value}</span>
+            <span className="font-mono text-3xl font-bold text-text">{c.value}</span>
             <span className="text-[12px] text-text-3">{c.sub}</span>
           </Link>
         ))}

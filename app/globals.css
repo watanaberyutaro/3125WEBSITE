@@ -71,9 +71,22 @@
   --breakpoint-xs: 480px;
 }
 
-*,
-*::before,
-*::after {
+/*
+ * CSS Cascade Layersの仕様上、レイヤーなしのルールは詳細度に関係なく常に
+ * レイヤー付きルール（Tailwindのユーティリティは @layer utilities に属する）
+ * より優先される。このリセットを無条件の全称セレクタ(* と *::before/*::after)で
+ * 書くと、管理画面(#admin-root、app/admin/layout.tsx)で使っているTailwindの
+ * 余白ユーティリティクラスが軒並み無効化されてしまう（実際に発生し、管理画面の
+ * 余白が全て潰れる不具合を確認済み）。公開サイト側のルートラッパー #site-root
+ * （app/(site)/layout.tsx）だけを対象に含める形にし、除外ではなく限定にすることで
+ * この問題を避けている。
+ */
+html,
+body,
+#site-root,
+#site-root *,
+#site-root *::before,
+#site-root *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
