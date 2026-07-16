@@ -15,9 +15,9 @@ export default async function AdminProtectedLayout({
   const staff = await requireStaff();
 
   return (
-    <div className="flex min-h-screen" style={{ background: "var(--bg)" }}>
+    <div className="flex min-h-screen flex-col md:flex-row" style={{ background: "var(--bg)" }}>
       <AdminSidebar staff={staff} />
-      <main className="flex-1 overflow-x-auto px-10 py-8">{children}</main>
+      <main className="flex-1 overflow-x-auto px-4 py-6 md:px-10 md:py-8">{children}</main>
     </div>
   );
 }

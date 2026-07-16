@@ -49,7 +49,7 @@ export function WorkForm({
   return (
     <form action={formAction} className="flex max-w-3xl flex-col gap-6">
       {defaults?.id && <input type="hidden" name="id" value={defaults.id} />}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <label className={labelClass} htmlFor="client_name">
             クライアント名 *
@@ -83,7 +83,7 @@ export function WorkForm({
         <input id="slug" name="slug" defaultValue={defaults?.slug} className={inputClass} placeholder="work-08" />
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="flex flex-col gap-1.5">
           <label className={labelClass} htmlFor="category_id">
             カテゴリ *
@@ -194,7 +194,7 @@ export function WorkForm({
       <ImageUploader bucket="works-images" name="cover_image_path" defaultPath={defaults?.cover_image_path} label="サムネイル画像" />
       <ImageUploader bucket="og-images" name="og_image_path" defaultPath={defaults?.og_image_path} label="OGP画像（空欄ならサムネイル画像を使用）" />
 
-      <div className="grid grid-cols-2 gap-4 border-t border-line pt-6">
+      <div className="grid grid-cols-1 gap-4 border-t border-line pt-6 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <label className={labelClass} htmlFor="seo_title">
             SEOタイトル（空欄なら自動生成）
