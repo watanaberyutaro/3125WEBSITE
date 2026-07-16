@@ -77,16 +77,22 @@
  * より優先される。このリセットを無条件の全称セレクタ(* と *::before/*::after)で
  * 書くと、管理画面(#admin-root、app/admin/layout.tsx)で使っているTailwindの
  * 余白ユーティリティクラスが軒並み無効化されてしまう（実際に発生し、管理画面の
- * 余白が全て潰れる不具合を確認済み）。公開サイト側のルートラッパー #site-root
- * （app/(site)/layout.tsx）だけを対象に含める形にし、除外ではなく限定にすることで
- * この問題を避けている。
+ * 余白が全て潰れる不具合を確認済み）。
+ * 一度は公開サイト側にDOMラッパー(#site-root)を追加し対象範囲を限定する方式を
+ * 試したが、position:fixedの.nav等、ビューポート基準のレイアウトに使っている
+ * 要素のずれ・左端が欠ける表示崩れを引き起こしたため撤回した。
+ * 次に :not(#admin-root, #admin-root *) による除外に切り替えたが、:not()は
+ * 引数の中で最も詳細度の高いセレクタ（ここではIDセレクタ #admin-root）の詳細度を
+ * そのまま引き継ぐ仕様のため、本来「詳細度ゼロの全称セレクタ」だったはずの
+ * このリセットがIDセレクタ並みの詳細度を持ってしまい、legacy-site.css側の
+ * クラスセレクタ（.home-hero__inner 等）による余白指定を軒並み上書きして
+ * 公開サイト全体の余白が消える別の不具合を引き起こした。
+ * :where()は引数の詳細度を常にゼロとして扱うため、除外ロジックはそのままに
+ * 詳細度だけを無条件の * と同じ(詳細度ゼロ)に戻せる。
  */
-html,
-body,
-#site-root,
-#site-root *,
-#site-root *::before,
-#site-root *::after {
+:where(*:not(#admin-root, #admin-root *)),
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
