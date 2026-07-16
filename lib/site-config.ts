@@ -7,13 +7,12 @@ export const siteConfig = {
   shortName: "3125",
   url: "https://3125.jp",
   tagline: "AIで、ビジネスを変える。",
-  description:
-    "AIマンツーマン教育・AI導入支援・AI研修。東京・南青山のAIエージェンシー。",
+  description: "AIマンツーマン教育・AI導入支援・AI研修を通じて、ビジネスのAI活用を支援するAIエージェンシー。",
   locale: "ja_JP",
   foundingDate: "2024-05-27",
-  capital: "100万円",
-  phone: "090-1828-5970",
-  phoneHref: "tel:09018285970",
+  capital: "1000000円",
+  phone: "090-1000-1930",
+  phoneHref: "tel:09010001930",
   email: "info@3125.jp",
   businessHours: "平日 10:00 – 18:00",
   address: {

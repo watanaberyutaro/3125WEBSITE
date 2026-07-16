@@ -11,7 +11,7 @@ import { buildMetadata } from "@/lib/seo/metadata";
 
 const TITLE = "AIコンサルティング会社について";
 const DESCRIPTION =
-  "3125株式会社について — AIマンツーマン教育・AI導入支援・AI研修を手がけるAIコンサルティング会社。2024年創業、東京・南青山。私たちのフィロソフィーとチームについてご紹介します。";
+  "3125株式会社について — AIマンツーマン教育・AI導入支援・AI研修を手がけるAIコンサルティング会社。2024年創業。私たちのフィロソフィーとチームについてご紹介します。";
 
 export const metadata: Metadata = buildMetadata({ title: TITLE, description: DESCRIPTION, path: "/about" });
 
@@ -47,7 +47,7 @@ export default function AboutPage() {
         eyebrowNum="About"
         label="About Us"
         title="AIで、未来をつくる。"
-        description="2024年5月、東京・南青山に設立。AIマンツーマン教育・AI導入支援・AI研修を通じて、ビジネスのAI活用を本質から支援する会社です。"
+        description="2024年5月設立。AIマンツーマン教育・AI導入支援・AI研修を通じて、ビジネスのAI活用を本質から支援する会社です。"
       />
 
       <section className="section section--dark" aria-labelledby="concept-heading">

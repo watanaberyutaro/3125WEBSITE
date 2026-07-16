@@ -19,10 +19,9 @@ export const revalidate = 3600;
 
 const TITLE = "3125株式会社 | AIで、ビジネスを変える。";
 const DESCRIPTION =
-  "3125株式会社は、東京・南青山を拠点とするAIエージェンシーです。AIマンツーマン教育・AI導入支援・AI研修を通じて、経営者から現場担当者まで本質的なAI活用を支援します。まずはお気軽にご相談ください。";
+  "3125株式会社はAIエージェンシーです。AIマンツーマン教育・AI導入支援・AI研修を通じて、経営者から現場担当者まで本質的なAI活用を支援します。まずはお気軽にご相談ください。";
 
-const OG_DESCRIPTION =
-  "AIマンツーマン教育・AI導入支援・AI研修を通して、ビジネスのAI活用を支援する。東京・南青山のAIエージェンシー。";
+const OG_DESCRIPTION = "AIマンツーマン教育・AI導入支援・AI研修を通して、ビジネスのAI活用を支援する。";
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
@@ -168,11 +167,11 @@ export default async function HomePage() {
             <span className="home-hero__display">AIで、</span>
             <span className="home-hero__display2">ビジネスを変える。</span>
             <span className="home-hero__jp-tagline">
-              東京・南青山発。AIマンツーマン教育から組織全体の導入まで、本質から支援する。
+              AIマンツーマン教育から組織全体の導入まで、本質から支援する。
             </span>
           </Reveal>
           <Reveal as="p" delay={3} className="home-hero__sub">
-            東京・南青山発。マンツーマン教育から組織全体のAI導入まで——あなたのビジネスに根ざした、実践的なAI活用を共に実現します。
+            マンツーマン教育から組織全体のAI導入まで——あなたのビジネスに根ざした、実践的なAI活用を共に実現します。
           </Reveal>
           <Reveal as="div" delay={4} className="home-hero__actions">
             <CtaButton href="/contact" variant="gold" magnetic>

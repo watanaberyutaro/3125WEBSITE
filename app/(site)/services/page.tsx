@@ -8,7 +8,7 @@ import { buildMetadata } from "@/lib/seo/metadata";
 
 const TITLE = "AIマンツーマン教育・AI導入支援・AI研修";
 const DESCRIPTION =
-  "3125株式会社のサービス — AIマンツーマン教育・AI導入支援・AI研修・AIコンテンツ制作・映像制作・Web制作。東京・南青山からビジネスのAI活用をトータルサポートします。";
+  "3125株式会社のサービス — AIマンツーマン教育・AI導入支援・AI研修・AIコンテンツ制作・映像制作・Web制作。ビジネスのAI活用をトータルサポートします。";
 
 export const metadata: Metadata = buildMetadata({ title: TITLE, description: DESCRIPTION, path: "/services" });
 

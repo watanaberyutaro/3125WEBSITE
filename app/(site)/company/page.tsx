@@ -8,9 +8,9 @@ import { Breadcrumb } from "@/components/seo/Breadcrumb";
 import { siteConfig } from "@/lib/site-config";
 import { buildMetadata } from "@/lib/seo/metadata";
 
-const TITLE = "会社概要（東京・南青山）";
+const TITLE = "会社概要";
 const DESCRIPTION =
-  "3125株式会社の会社情報 — 東京都港区南青山に拠点を置くAIコンサルティング会社。AIマンツーマン教育・AI導入支援・AI研修を提供。会社概要・代表情報・所在地をご確認いただけます。";
+  "3125株式会社の会社情報 — AIマンツーマン教育・AI導入支援・AI研修を提供するAIコンサルティング会社。会社概要・代表情報・所在地をご確認いただけます。";
 
 export const metadata: Metadata = buildMetadata({ title: TITLE, description: DESCRIPTION, path: "/company" });
 
@@ -19,7 +19,6 @@ const TICKER_ITEMS = [
   "AI導入支援",
   "AI Training",
   "AI Contents",
-  "南青山 · Tokyo",
   "Est. 2024",
 ];
 
@@ -31,7 +30,7 @@ export default function CompanyPage() {
         eyebrowNum="Co."
         label="Company"
         title="会社概要。"
-        description="2024年5月、東京・南青山設立。AIマンツーマン教育・AI導入支援・AI研修を通じて、企業のAI活用を本質から支援するコンサルティング会社です。"
+        description="2024年5月設立。AIマンツーマン教育・AI導入支援・AI研修を通じて、企業のAI活用を本質から支援するコンサルティング会社です。"
       />
 
       <section className="section section--dark" aria-labelledby="info-heading">
