@@ -12,6 +12,29 @@
 ──────────────────────────────────────────────────────────────── */
 * { cursor: none; }
 
+/* 管理画面(/admin以下)はカスタムカーソルを描画しないため、
+   ブラウザ標準のカーソル表示に戻す（app/admin/layout.tsxのid="admin-root"に対応）。
+   revertはブラウザによって解釈が不安定なため、autoを明示的に指定する。 */
+#admin-root,
+#admin-root * {
+  cursor: auto;
+}
+#admin-root a,
+#admin-root button,
+#admin-root [role="button"],
+#admin-root select,
+#admin-root label {
+  cursor: pointer;
+}
+#admin-root input,
+#admin-root textarea {
+  cursor: text;
+}
+#admin-root button:disabled,
+#admin-root [aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
 .cursor {
   position: fixed;
   top: 0; left: 0;
