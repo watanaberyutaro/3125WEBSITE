@@ -29,7 +29,11 @@ export async function POST(req: Request) {
 
   const admin = createAdminClient();
 
-  const { data: job, error: jobError } = await admin.from("publish_jobs").select("*").eq("id", jobId).maybeSingle();
+  const { data: job, error: jobError } = await admin
+    .from("publish_jobs")
+    .select("*, drafts(content_type)")
+    .eq("id", jobId)
+    .maybeSingle();
   if (jobError || !job) {
     return NextResponse.json({ ok: false, error: "job not found" }, { status: 200 });
   }
@@ -41,12 +45,13 @@ export async function POST(req: Request) {
 
   await admin.from("publish_jobs").update({ status: "processing" }).eq("id", jobId);
 
-  if (!isPathAllowed(job.target_path)) {
+  const contentType = job.drafts?.content_type;
+  if (!contentType || !isPathAllowed(job.target_path, contentType)) {
     await admin
       .from("publish_jobs")
       .update({
         status: "failed",
-        error_message: `許可されていないパスです（content/配下の.mdファイルのみpush可能）: ${job.target_path}`,
+        error_message: `許可されていないパスまたは未対応の種別です（service_pageはcontent/services/配下の.mdファイルのみpush可能。それ以外の種別はまだ公開先の実装がありません）: ${job.target_path}`,
         processed_at: new Date().toISOString(),
       })
       .eq("id", jobId);
@@ -72,7 +77,8 @@ export async function POST(req: Request) {
   }
 
   try {
-    const markdown = serializeToMarkdown(version);
+    const processedAt = new Date().toISOString();
+    const markdown = serializeToMarkdown(version, processedAt);
     const result = await putFile(job.target_path, markdown, `docs: publish ${job.target_path} via draft ${job.draft_id}`);
 
     await admin
@@ -81,7 +87,7 @@ export async function POST(req: Request) {
         status: "succeeded",
         commit_sha: result.commitSha,
         commit_url: result.commitUrl,
-        processed_at: new Date().toISOString(),
+        processed_at: processedAt,
       })
       .eq("id", jobId);
 

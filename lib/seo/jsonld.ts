@@ -102,6 +102,23 @@ export function toolJsonLd(tool: { name: string; description: string; slug: stri
   };
 }
 
+export function serviceJsonLd(service: {
+  title: string;
+  slug: string;
+  description: string | null;
+  updatedAt: string | null;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: service.title,
+    description: service.description ?? undefined,
+    provider: { "@type": "Organization", name: siteConfig.name },
+    url: `${siteConfig.url}/services/${service.slug}`,
+    dateModified: service.updatedAt ?? undefined,
+  };
+}
+
 export function creativeWorkJsonLd(work: {
   clientName: string;
   projectName: string;

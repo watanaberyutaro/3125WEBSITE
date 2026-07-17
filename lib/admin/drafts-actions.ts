@@ -7,6 +7,18 @@ import { createClient } from "@/lib/supabase/server";
 import { requireStaff } from "@/lib/auth/session";
 import { slugify } from "./slug";
 
+/**
+ * フェーズ5で確定した境界ポリシー（曖昧にしない）:
+ *   - article: ブログ/ニュース的で /column の一覧・カテゴリ・タグ・RSSに乗せたい
+ *     コンテンツ。専用CTA/FAQ/Service構造化データは不要。articlesテーブルへ
+ *     直接publishし、Gitを経由しない。
+ *   - service_page: 恒久URLを持つべき、CTA・FAQ・Service schemaが有効な
+ *     ランディングページ。content/services/<slug>.md 経由でGit pushする
+ *     （publish_jobs → app/(site)/services/[slug]/page.tsx）。
+ *   - cta_copy/faq/landing_page/other: まだ対応する描画面が存在しないため、
+ *     reviewDraft()の承認時点でブロックする（誰も読まないファイルへの
+ *     コミットを防ぐ）。描画面ができたフェーズで個別に解禁する。
+ */
 const CONTENT_TYPES = ["article", "service_page", "cta_copy", "faq", "landing_page", "other"] as const;
 
 const DraftVersionSchema = z.object({
@@ -237,6 +249,13 @@ export async function reviewDraft(_prev: ReviewActionState, formData: FormData):
       revalidatePath(`/admin/drafts/${draftId}`);
       revalidatePath("/column");
       redirect(`/admin/drafts/${draftId}?reviewed=1`);
+    }
+
+    // フェーズ5時点で描画面があるのはservice_pageのみ。それ以外を承認しても
+    // 誰も読まないファイルへコミットするだけなので、publish_jobsまで進める前に
+    // 承認画面で即座に弾く（非同期のpublish_jobs失敗として後で発覚するより親切）。
+    if (draft.content_type !== "service_page") {
+      return { error: "この種別はまだ公開先の実装がありません（現在対応済み: article, service_page）。" };
     }
 
     if (!draft.target_path) {

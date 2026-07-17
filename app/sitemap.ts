@@ -3,6 +3,7 @@ import { siteConfig } from "@/lib/site-config";
 import { getPublishedWorks, getWorkCategories, getWorkIndustries } from "@/lib/works/queries";
 import { getArticleCategories, getArticleTags, getPublishedArticles } from "@/lib/column/queries";
 import { TOOLS } from "@/lib/tools/registry";
+import { listServicePagesForSitemap } from "@/lib/content/service-pages";
 
 export const revalidate = 3600;
 
@@ -18,7 +19,7 @@ const STATIC_ROUTES: { path: string; changeFrequency: MetadataRoute.Sitemap[numb
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [works, workCategories, workIndustries, articles, articleCategories, articleTags] =
+  const [works, workCategories, workIndustries, articles, articleCategories, articleTags, servicePages] =
     await Promise.all([
       getPublishedWorks(),
       getWorkCategories(),
@@ -26,6 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       getPublishedArticles(),
       getArticleCategories(),
       getArticleTags(),
+      listServicePagesForSitemap(),
     ]);
 
   const staticEntries: MetadataRoute.Sitemap = STATIC_ROUTES.map((r) => ({
@@ -77,6 +79,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
+  const serviceEntries: MetadataRoute.Sitemap = servicePages.map((s) => ({
+    url: `${siteConfig.url}/services/${s.slug}`,
+    lastModified: s.updatedAt ?? undefined,
+    changeFrequency: "monthly",
+    priority: 0.8,
+  }));
+
   return [
     ...staticEntries,
     ...workEntries,
@@ -86,5 +95,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...articleCategoryEntries,
     ...articleTagEntries,
     ...toolEntries,
+    ...serviceEntries,
   ];
 }

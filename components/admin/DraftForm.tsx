@@ -72,14 +72,14 @@ export function DraftForm({
           </div>
           <div className="flex flex-col gap-1.5">
             <label className={labelClass} htmlFor="target_path">
-              想定パス（任意。例: /column/ai-training-guide）
+              公開先パス（service_pageの場合必須。例: content/services/ai-training.md）
             </label>
             <input
               id="target_path"
               name="target_path"
               defaultValue={defaults?.target_path ?? ""}
               className={inputClass}
-              placeholder="/column/..."
+              placeholder="content/services/..."
             />
           </div>
         </div>
