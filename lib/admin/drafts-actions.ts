@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireStaff } from "@/lib/auth/session";
+import { slugify } from "./slug";
 
 const CONTENT_TYPES = ["article", "service_page", "cta_copy", "faq", "landing_page", "other"] as const;
 
@@ -169,7 +170,14 @@ export type ReviewActionState = { error?: string } | undefined;
 /**
  * 承認/修正依頼/却下を確定する。修正依頼・却下はコメント必須
  * （次回生成・NGパターン抽出に使うため空コメントを許可しない）。
- * 承認後の実際のGit push処理はフェーズ3で実装する（ここではstatus更新のみ）。
+ *
+ * 承認(approve)時の公開方法はcontent_typeで分岐する:
+ *   - article: 既存のarticlesテーブルへ直接insertし即座に公開する
+ *     （/columnはSupabaseから動的描画されるCMSデータのためGit不要）。
+ *   - それ以外(service_page等、実コード変更が必要な種別): publish_jobsへ
+ *     ジョブを積むのみ。実際のGit pushはSupabase側のpg_netトリガーが
+ *     app/api/jobs/process-publish を非同期に叩いて行う
+ *     （0008_publish_jobs.sql参照）。ここではジョブ登録までしか行わない。
  */
 export async function reviewDraft(_prev: ReviewActionState, formData: FormData): Promise<ReviewActionState> {
   const staff = await requireStaff();
@@ -186,8 +194,87 @@ export async function reviewDraft(_prev: ReviewActionState, formData: FormData):
 
   const supabase = await createClient();
 
-  const statusMap = { approve: "approved", revise: "needs_revision", reject: "rejected" } as const;
-  const commentTypeMap = { approve: "approval_note", revise: "revision", reject: "rejection" } as const;
+  if (decision === "approve") {
+    const { data: draft, error: draftFetchError } = await supabase
+      .from("drafts")
+      .select("content_type, target_path")
+      .eq("id", draftId)
+      .single();
+    if (draftFetchError || !draft) {
+      return { error: `下書きの取得に失敗しました: ${draftFetchError?.message}` };
+    }
+
+    if (draft.content_type === "article") {
+      const { data: version, error: versionError } = await supabase
+        .from("draft_versions")
+        .select("title, body_markdown, seo_title, seo_description, faq")
+        .eq("id", draftVersionId)
+        .single();
+      if (versionError || !version) {
+        return { error: `バージョンの取得に失敗しました: ${versionError?.message}` };
+      }
+
+      const { error: articleError } = await supabase.from("articles").insert({
+        slug: slugify(version.title),
+        title: version.title,
+        body_markdown: version.body_markdown,
+        seo_title: version.seo_title,
+        seo_description: version.seo_description,
+        faq: version.faq,
+        status: "published",
+        published_at: new Date().toISOString(),
+      });
+      if (articleError) {
+        return { error: `記事の公開に失敗しました: ${articleError.message}` };
+      }
+
+      const { error: draftUpdateError } = await supabase.from("drafts").update({ status: "published" }).eq("id", draftId);
+      if (draftUpdateError) {
+        return { error: `下書きステータスの更新に失敗しました: ${draftUpdateError.message}` };
+      }
+
+      revalidatePath("/admin/drafts");
+      revalidatePath(`/admin/drafts/${draftId}`);
+      revalidatePath("/column");
+      redirect(`/admin/drafts/${draftId}?reviewed=1`);
+    }
+
+    if (!draft.target_path) {
+      return { error: "この種別を承認するには「想定パス」の入力が必須です（下書き作成画面で設定してください）。" };
+    }
+
+    const { error: draftUpdateError } = await supabase.from("drafts").update({ status: "approved" }).eq("id", draftId);
+    if (draftUpdateError) {
+      return { error: `下書きステータスの更新に失敗しました: ${draftUpdateError.message}` };
+    }
+
+    const { error: jobError } = await supabase.from("publish_jobs").insert({
+      draft_id: draftId,
+      draft_version_id: draftVersionId,
+      target_path: draft.target_path,
+      created_by: staff.id,
+    });
+    if (jobError) {
+      return { error: `公開ジョブの登録に失敗しました: ${jobError.message}` };
+    }
+
+    if (comment) {
+      await supabase.from("review_comments").insert({
+        draft_id: draftId,
+        draft_version_id: draftVersionId || null,
+        comment_type: "approval_note",
+        body: comment,
+        created_by: staff.id,
+      });
+    }
+
+    revalidatePath("/admin/drafts");
+    revalidatePath(`/admin/drafts/${draftId}`);
+    redirect(`/admin/drafts/${draftId}?reviewed=1`);
+  }
+
+  const statusMap = { revise: "needs_revision", reject: "rejected" } as const;
+  const commentTypeMap = { revise: "revision", reject: "rejection" } as const;
 
   const { error: draftError } = await supabase
     .from("drafts")
@@ -198,20 +285,47 @@ export async function reviewDraft(_prev: ReviewActionState, formData: FormData):
     return { error: `ステータス更新に失敗しました: ${draftError.message}` };
   }
 
-  if (comment) {
-    const { error: commentError } = await supabase.from("review_comments").insert({
-      draft_id: draftId,
-      draft_version_id: draftVersionId || null,
-      comment_type: commentTypeMap[decision],
-      body: comment,
-      created_by: staff.id,
-    });
-    if (commentError) {
-      return { error: `コメントの保存に失敗しました: ${commentError.message}` };
-    }
+  const { error: commentError } = await supabase.from("review_comments").insert({
+    draft_id: draftId,
+    draft_version_id: draftVersionId || null,
+    comment_type: commentTypeMap[decision],
+    body: comment,
+    created_by: staff.id,
+  });
+  if (commentError) {
+    return { error: `コメントの保存に失敗しました: ${commentError.message}` };
   }
 
   revalidatePath("/admin/drafts");
   revalidatePath(`/admin/drafts/${draftId}`);
   redirect(`/admin/drafts/${draftId}?reviewed=1`);
+}
+
+const RetryPublishSchema = z.object({
+  draftId: z.string().trim().min(1),
+  draftVersionId: z.string().trim().min(1),
+  targetPath: z.string().trim().min(1),
+});
+
+/**
+ * 失敗したpublish_jobsを再試行する。既存行を書き換えず新しい行をINSERTする
+ * （INSERTのたびにpg_netトリガーが起動する仕組みのため、UPDATEでは再処理されない。
+ * 履歴としても、各試行を独立した行として残す方が監査しやすい）。
+ */
+export async function retryPublishJob(formData: FormData): Promise<void> {
+  const staff = await requireStaff();
+  const parsed = RetryPublishSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!parsed.success) throw new Error(parsed.error.issues.map((i) => i.message).join(" / "));
+  const { draftId, draftVersionId, targetPath } = parsed.data;
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("publish_jobs").insert({
+    draft_id: draftId,
+    draft_version_id: draftVersionId,
+    target_path: targetPath,
+    created_by: staff.id,
+  });
+  if (error) throw new Error(error.message);
+
+  revalidatePath(`/admin/drafts/${draftId}`);
 }

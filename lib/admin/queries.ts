@@ -81,25 +81,31 @@ export async function getAdminDrafts(status?: DraftStatus) {
   return data;
 }
 
-/** 下書き詳細 + 全バージョン(新しい順) + 全コメント(新しい順)をまとめて取得する。 */
+/** 下書き詳細 + 全バージョン(新しい順) + 全コメント(新しい順) + 公開ジョブ履歴(新しい順)をまとめて取得する。 */
 export async function getAdminDraftWithHistory(id: string) {
   const supabase = await createClient();
 
-  const [{ data: draft, error: draftError }, { data: versions, error: versionsError }, { data: comments, error: commentsError }] =
-    await Promise.all([
-      supabase.from("drafts").select("*").eq("id", id).maybeSingle(),
-      supabase.from("draft_versions").select("*").eq("draft_id", id).order("version_number", { ascending: false }),
-      supabase
-        .from("review_comments")
-        .select("*, profiles(display_name)")
-        .eq("draft_id", id)
-        .order("created_at", { ascending: false }),
-    ]);
+  const [
+    { data: draft, error: draftError },
+    { data: versions, error: versionsError },
+    { data: comments, error: commentsError },
+    { data: publishJobs, error: publishJobsError },
+  ] = await Promise.all([
+    supabase.from("drafts").select("*").eq("id", id).maybeSingle(),
+    supabase.from("draft_versions").select("*").eq("draft_id", id).order("version_number", { ascending: false }),
+    supabase
+      .from("review_comments")
+      .select("*, profiles(display_name)")
+      .eq("draft_id", id)
+      .order("created_at", { ascending: false }),
+    supabase.from("publish_jobs").select("*").eq("draft_id", id).order("created_at", { ascending: false }),
+  ]);
 
   if (draftError) throw new Error(draftError.message);
   if (versionsError) throw new Error(versionsError.message);
   if (commentsError) throw new Error(commentsError.message);
+  if (publishJobsError) throw new Error(publishJobsError.message);
   if (!draft) return null;
 
-  return { draft, versions: versions ?? [], comments: comments ?? [] };
+  return { draft, versions: versions ?? [], comments: comments ?? [], publishJobs: publishJobs ?? [] };
 }

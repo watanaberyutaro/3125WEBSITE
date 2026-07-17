@@ -309,6 +309,70 @@ export type Database = {
         }
         Relationships: []
       }
+      publish_jobs: {
+        Row: {
+          commit_sha: string | null
+          commit_url: string | null
+          created_at: string
+          created_by: string | null
+          draft_id: string
+          draft_version_id: string
+          error_message: string | null
+          id: string
+          processed_at: string | null
+          status: string
+          target_path: string
+        }
+        Insert: {
+          commit_sha?: string | null
+          commit_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          draft_id: string
+          draft_version_id: string
+          error_message?: string | null
+          id?: string
+          processed_at?: string | null
+          status?: string
+          target_path: string
+        }
+        Update: {
+          commit_sha?: string | null
+          commit_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          draft_id?: string
+          draft_version_id?: string
+          error_message?: string | null
+          id?: string
+          processed_at?: string | null
+          status?: string
+          target_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "publish_jobs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "publish_jobs_draft_id_fkey"
+            columns: ["draft_id"]
+            isOneToOne: false
+            referencedRelation: "drafts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "publish_jobs_draft_version_id_fkey"
+            columns: ["draft_version_id"]
+            isOneToOne: false
+            referencedRelation: "draft_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       redirects: {
         Row: {
           created_at: string
