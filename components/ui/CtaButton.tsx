@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { ArrowIcon } from "./ArrowIcon";
 import { useMagnetic } from "@/components/motion/useMagnetic";
+import { trackEvent } from "@/lib/analytics/gtag";
 
 type Variant = "gold" | "outline" | "outline-gold";
 
@@ -37,8 +39,18 @@ export function CtaButton({
 }: CtaButtonProps) {
   const showIcon = icon ?? variant !== "outline";
   const { ref, onMouseMove, onMouseLeave } = useMagnetic<HTMLAnchorElement>();
+  const pathname = usePathname();
   const classes = ["btn", `btn--${variant}`, className].filter(Boolean).join(" ");
   const handlers = magnetic ? { onMouseMove, onMouseLeave } : {};
+
+  const handleClick = () => {
+    trackEvent("cta_click", {
+      cta_label: typeof children === "string" ? children : href,
+      cta_location: pathname,
+      cta_destination: href,
+      cta_variant: variant,
+    });
+  };
 
   if (isExternalHref(href)) {
     return (
@@ -46,6 +58,7 @@ export function CtaButton({
         href={href}
         className={classes}
         ref={magnetic ? ref : undefined}
+        onClick={handleClick}
         {...handlers}
       >
         {children}
@@ -55,7 +68,7 @@ export function CtaButton({
   }
 
   return (
-    <Link href={href} className={classes} ref={magnetic ? ref : undefined} {...handlers}>
+    <Link href={href} className={classes} ref={magnetic ? ref : undefined} onClick={handleClick} {...handlers}>
       {children}
       {showIcon && <ArrowIcon />}
     </Link>

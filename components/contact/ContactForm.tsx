@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Script from "next/script";
 import { ArrowIcon } from "@/components/ui/ArrowIcon";
+import { trackEvent } from "@/lib/analytics/gtag";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -75,9 +76,14 @@ export function ContactForm() {
         throw new Error(data.error ?? "送信に失敗しました");
       }
 
+      trackEvent("generate_lead", {
+        form_name: "contact",
+        inquiry_type: String(formData.get("inquiry") ?? ""),
+      });
       setStatus("success");
       form.reset();
     } catch {
+      trackEvent("form_submit_error", { form_name: "contact" });
       setStatus("error");
     }
   };

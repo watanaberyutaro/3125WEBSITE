@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ArrowIcon } from "@/components/ui/ArrowIcon";
 import { ToolResult } from "./ToolResult";
 import type { ToolField, ToolOutput } from "@/lib/tools/types";
+import { trackEvent } from "@/lib/analytics/gtag";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -34,6 +35,7 @@ export function ToolForm({ slug, fields }: { slug: string; fields: ToolField[] }
         throw new Error(data.error ?? "生成に失敗しました");
       }
 
+      trackEvent("tool_use", { tool_slug: slug });
       setOutput(data.output);
       setStatus("success");
     } catch (err) {

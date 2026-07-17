@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { siteConfig } from "@/lib/site-config";
+import { trackEvent } from "@/lib/analytics/gtag";
 
 const NAV_LINKS = [
   { href: "/about", label: "About" },
@@ -74,6 +75,15 @@ export function Nav() {
 
   const isActive = (href: string) => pathname === href;
 
+  const trackContactClick = (location: string) => {
+    trackEvent("cta_click", {
+      cta_label: "Contact",
+      cta_location: pathname,
+      cta_destination: "/contact",
+      cta_variant: location,
+    });
+  };
+
   return (
     <>
       <nav
@@ -99,6 +109,7 @@ export function Nav() {
               <Link
                 href="/contact"
                 className={`nav__cta${isActive("/contact") ? " active" : ""}`}
+                onClick={() => trackContactClick("nav-desktop")}
               >
                 Contact
               </Link>
@@ -156,7 +167,10 @@ export function Nav() {
                 <Link
                   href="/contact"
                   className={`mm__link mm__link--cta${isActive("/contact") ? " active" : ""}`}
-                  onClick={() => setMenuOpen(false)}
+                  onClick={() => {
+                    trackContactClick("nav-mobile");
+                    setMenuOpen(false);
+                  }}
                 >
                   Contact
                 </Link>
