@@ -69,3 +69,37 @@ export async function getAdminToolLeads() {
   if (error) throw new Error(error.message);
   return data;
 }
+
+export type DraftStatus = "draft" | "needs_revision" | "rejected" | "approved" | "published";
+
+export async function getAdminDrafts(status?: DraftStatus) {
+  const supabase = await createClient();
+  let query = supabase.from("drafts").select("*").order("updated_at", { ascending: false });
+  if (status) query = query.eq("status", status);
+  const { data, error } = await query;
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+/** 下書き詳細 + 全バージョン(新しい順) + 全コメント(新しい順)をまとめて取得する。 */
+export async function getAdminDraftWithHistory(id: string) {
+  const supabase = await createClient();
+
+  const [{ data: draft, error: draftError }, { data: versions, error: versionsError }, { data: comments, error: commentsError }] =
+    await Promise.all([
+      supabase.from("drafts").select("*").eq("id", id).maybeSingle(),
+      supabase.from("draft_versions").select("*").eq("draft_id", id).order("version_number", { ascending: false }),
+      supabase
+        .from("review_comments")
+        .select("*, profiles(display_name)")
+        .eq("draft_id", id)
+        .order("created_at", { ascending: false }),
+    ]);
+
+  if (draftError) throw new Error(draftError.message);
+  if (versionsError) throw new Error(versionsError.message);
+  if (commentsError) throw new Error(commentsError.message);
+  if (!draft) return null;
+
+  return { draft, versions: versions ?? [], comments: comments ?? [] };
+}

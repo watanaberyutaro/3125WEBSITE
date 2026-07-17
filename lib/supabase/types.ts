@@ -142,6 +142,110 @@ export type Database = {
         }
         Relationships: []
       }
+      draft_versions: {
+        Row: {
+          body_markdown: string
+          created_at: string
+          created_by: string | null
+          cta_href: string | null
+          cta_label: string | null
+          draft_id: string
+          faq: Json
+          generated_by: string
+          id: string
+          seo_description: string | null
+          seo_title: string | null
+          title: string
+          version_number: number
+        }
+        Insert: {
+          body_markdown?: string
+          created_at?: string
+          created_by?: string | null
+          cta_href?: string | null
+          cta_label?: string | null
+          draft_id: string
+          faq?: Json
+          generated_by?: string
+          id?: string
+          seo_description?: string | null
+          seo_title?: string | null
+          title: string
+          version_number: number
+        }
+        Update: {
+          body_markdown?: string
+          created_at?: string
+          created_by?: string | null
+          cta_href?: string | null
+          cta_label?: string | null
+          draft_id?: string
+          faq?: Json
+          generated_by?: string
+          id?: string
+          seo_description?: string | null
+          seo_title?: string | null
+          title?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "draft_versions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "draft_versions_draft_id_fkey"
+            columns: ["draft_id"]
+            isOneToOne: false
+            referencedRelation: "drafts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      drafts: {
+        Row: {
+          content_type: string
+          created_at: string
+          created_by: string | null
+          id: string
+          status: string
+          target_path: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          status?: string
+          target_path?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          status?: string
+          target_path?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drafts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inquiries: {
         Row: {
           budget: string | null
@@ -228,6 +332,58 @@ export type Database = {
           to_path?: string
         }
         Relationships: []
+      }
+      review_comments: {
+        Row: {
+          body: string
+          comment_type: string
+          created_at: string
+          created_by: string | null
+          draft_id: string
+          draft_version_id: string | null
+          id: string
+        }
+        Insert: {
+          body: string
+          comment_type: string
+          created_at?: string
+          created_by?: string | null
+          draft_id: string
+          draft_version_id?: string | null
+          id?: string
+        }
+        Update: {
+          body?: string
+          comment_type?: string
+          created_at?: string
+          created_by?: string | null
+          draft_id?: string
+          draft_version_id?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_comments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_comments_draft_id_fkey"
+            columns: ["draft_id"]
+            isOneToOne: false
+            referencedRelation: "drafts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_comments_draft_version_id_fkey"
+            columns: ["draft_version_id"]
+            isOneToOne: false
+            referencedRelation: "draft_versions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tags: {
         Row: {
