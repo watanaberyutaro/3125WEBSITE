@@ -288,6 +288,80 @@ export type Database = {
         }
         Relationships: []
       }
+      job_runs: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          draft_id: string
+          draft_version_id: string | null
+          error_message: string | null
+          id: string
+          input: Json
+          kind: string
+          output: Json
+          processed_at: string | null
+          result_draft_version_id: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          draft_id: string
+          draft_version_id?: string | null
+          error_message?: string | null
+          id?: string
+          input?: Json
+          kind: string
+          output?: Json
+          processed_at?: string | null
+          result_draft_version_id?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          draft_id?: string
+          draft_version_id?: string | null
+          error_message?: string | null
+          id?: string
+          input?: Json
+          kind?: string
+          output?: Json
+          processed_at?: string | null
+          result_draft_version_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_runs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_runs_draft_id_fkey"
+            columns: ["draft_id"]
+            isOneToOne: false
+            referencedRelation: "drafts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_runs_draft_version_id_fkey"
+            columns: ["draft_version_id"]
+            isOneToOne: false
+            referencedRelation: "draft_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_runs_result_draft_version_id_fkey"
+            columns: ["result_draft_version_id"]
+            isOneToOne: false
+            referencedRelation: "draft_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
