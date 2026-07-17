@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getAdminDrafts, type DraftStatus } from "@/lib/admin/queries";
 import { DraftStatusBadge } from "@/components/admin/DraftStatusBadge";
+import { formatDateTime } from "@/lib/admin/format";
 
 const STATUS_TABS: { value: DraftStatus | "all"; label: string }[] = [
   { value: "all", label: "すべて" },
@@ -19,11 +20,6 @@ const CONTENT_TYPE_LABEL: Record<string, string> = {
   landing_page: "LP",
   other: "その他",
 };
-
-function formatDateTime(iso: string) {
-  const d = new Date(iso);
-  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-}
 
 export default async function AdminDraftsPage({
   searchParams,

@@ -1,3 +1,5 @@
+import { formatDateTime } from "@/lib/admin/format";
+
 type Comment = {
   id: string;
   comment_type: string;
@@ -11,11 +13,6 @@ const COMMENT_TYPE_LABEL: Record<string, string> = {
   rejection: "却下",
   approval_note: "承認メモ",
 };
-
-function formatDateTime(iso: string) {
-  const d = new Date(iso);
-  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-}
 
 function resolveDisplayName(profiles: Comment["profiles"]): string {
   const profile = Array.isArray(profiles) ? profiles[0] : profiles;

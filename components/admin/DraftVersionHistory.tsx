@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { DraftVersionDiff } from "./DraftVersionDiff";
+import { formatDateTime } from "@/lib/admin/format";
 
 type Version = {
   id: string;
@@ -15,11 +16,6 @@ type Version = {
   generated_by: string;
   created_at: string;
 };
-
-function formatDateTime(iso: string) {
-  const d = new Date(iso);
-  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-}
 
 /**
  * バージョン一覧(新しい順に受け取る) + 選択中バージョンのプレビュー・前バージョンとの差分。
