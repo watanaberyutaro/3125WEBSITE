@@ -14,6 +14,7 @@ import { RegenerateFromCommentsButton } from "@/components/admin/RegenerateFromC
 import { RunReviewCheckButton } from "@/components/admin/RunReviewCheckButton";
 import { JobRunsAutoRefresh } from "@/components/admin/JobRunsAutoRefresh";
 import { RetryGenerateButton } from "@/components/admin/RetryGenerateButton";
+import { RegenerateWithAIButton } from "@/components/admin/RegenerateWithAIButton";
 
 const CONTENT_TYPE_LABEL: Record<string, string> = {
   article: "記事",
@@ -112,7 +113,12 @@ export default async function DraftDetailPage({ params }: { params: Promise<{ id
           </h2>
           <div className="flex flex-col gap-2">
             <p className="text-[13px] text-text-3">ルールベースで、過去の修正・却下コメントをチェックリスト化して引き継いだ新バージョンを自動生成できます。</p>
-            <RegenerateFromCommentsButton draftId={draft.id} />
+            <div className="flex flex-wrap gap-3">
+              <RegenerateFromCommentsButton draftId={draft.id} />
+              {(draft.content_type === "article" || draft.content_type === "service_page") && (
+                <RegenerateWithAIButton draftId={draft.id} />
+              )}
+            </div>
           </div>
           <p className="font-mono text-[11px] tracking-[0.06em] text-text-3 uppercase">または手動で修正する</p>
           <DraftForm
@@ -167,7 +173,7 @@ export default async function DraftDetailPage({ params }: { params: Promise<{ id
 
       <section className="flex flex-col gap-4 border-t border-line pt-6">
         <h2 className="font-mono text-[12px] tracking-[0.06em] text-text-3 uppercase">コメント履歴</h2>
-        <DraftCommentHistory comments={comments} />
+        <DraftCommentHistory comments={comments} contentType={draft.content_type} />
       </section>
     </div>
   );

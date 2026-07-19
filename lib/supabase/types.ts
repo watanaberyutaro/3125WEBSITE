@@ -471,6 +471,51 @@ export type Database = {
         }
         Relationships: []
       }
+      rejection_rules: {
+        Row: {
+          active: boolean
+          content_type: string
+          created_at: string
+          created_by: string | null
+          id: string
+          rule_text: string
+          source_review_comment_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          content_type: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          rule_text: string
+          source_review_comment_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          content_type?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          rule_text?: string
+          source_review_comment_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rejection_rules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rejection_rules_source_review_comment_id_fkey"
+            columns: ["source_review_comment_id"]
+            isOneToOne: false
+            referencedRelation: "review_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       review_comments: {
         Row: {
           body: string

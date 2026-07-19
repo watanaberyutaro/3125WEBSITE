@@ -9,6 +9,7 @@ import type { StaffProfile } from "@/lib/auth/session";
 const NAV_ITEMS = [
   { href: "/admin", label: "ダッシュボード", exact: true as boolean },
   { href: "/admin/drafts", label: "下書き", exact: false as boolean },
+  { href: "/admin/rejection-rules", label: "改善ルール", exact: false as boolean },
   { href: "/admin/works", label: "制作実績", exact: false as boolean },
   { href: "/admin/articles", label: "記事", exact: false as boolean },
   { href: "/admin/categories", label: "カテゴリ", exact: false as boolean },

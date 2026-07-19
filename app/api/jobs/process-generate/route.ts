@@ -1,34 +1,44 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { callDeepSeekChat } from "@/lib/ai/deepseek";
 
 export const runtime = "nodejs";
 // DeepSeek APIは実測で1リクエスト(全フィールド生成)あたり10秒未満で完了する。
-// 60秒のDEEPSEEK_TIMEOUT_MS + DB往復分の余裕を見て設定。
+// タイムアウト(60秒) + DB往復分の余裕を見て設定。
 export const maxDuration = 90;
-
-/**
- * job_runsのkind='generate'のうちinput.source==='llm'のものが、
- * 0010_llm_generate_trigger.sqlのpg_netトリガー経由でここに到達する。
- *
- * 当初はユーザー自身のAI Gateway(Cloudflare Tunnel経由・自宅PCのLM Studioで
- * ローカル推論モデルgpt-oss-20bを実行)を呼ぶ設計だったが、実測でCloudflareの
- * エッジがプロキシ済みトラフィックを約100〜125秒で強制切断すること、かつ
- * 推論モデル自体の応答（本文生成のみでも）が90秒を超えることが多く、
- * 確実な生成が困難だったため、DeepSeek API(https://api.deepseek.com)へ
- * 切り替えた。DeepSeekは実測で1リクエスト(title+body+seo+faq+cta全フィールド)
- * あたり10秒未満で完了し、コストも1回あたり$0.001未満と無視できる水準
- * （2026-07時点の公式料金より試算。要最新料金確認）。
- */
-const DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions";
-const DEEPSEEK_MODEL = "deepseek-chat";
-const DEEPSEEK_TIMEOUT_MS = 60_000;
 
 const ARTICLE_SCHEMA_HINT = `{"title":"string","body_markdown":"string (Markdown形式、600〜900字程度、見出しを含む)","seo_title":"string (60字以内)","seo_description":"string (160字以内)","faq":[{"question":"string","answer":"string"}] (0〜3件)}`;
 const SERVICE_PAGE_SCHEMA_HINT = `{"title":"string","body_markdown":"string (Markdown形式、600〜900字程度、見出しを含む)","seo_title":"string (60字以内)","seo_description":"string (160字以内)","cta_label":"string (行動喚起ボタンの文言)","faq":[{"question":"string","answer":"string"}] (0〜3件)}`;
 
-function buildSystemPrompt(contentType: string): string {
+const REVIEW_COMMENT_TYPE_LABEL: Record<string, string> = { rejection: "却下", revision: "修正依頼" };
+
+/**
+ * rejection_rules(Phase7)からcontent_type一致・active=trueのルールを取得し、
+ * システムプロンプトに注入する。0件なら何も追記しない(既存動作を壊さない)。
+ * staffが個別のコメントを明示的に「ルール化」した時だけ増える設計のため、
+ * 上限20件で十分（無制限にプロンプトが肥大化するのを防ぐ）。
+ */
+async function fetchActiveRules(
+  admin: ReturnType<typeof createAdminClient>,
+  contentType: string,
+): Promise<string[]> {
+  const { data } = await admin
+    .from("rejection_rules")
+    .select("rule_text")
+    .eq("content_type", contentType)
+    .eq("active", true)
+    .order("created_at", { ascending: false })
+    .limit(20);
+  return (data ?? []).map((r) => r.rule_text);
+}
+
+function buildSystemPrompt(contentType: string, rules: string[]): string {
   const schema = contentType === "service_page" ? SERVICE_PAGE_SCHEMA_HINT : ARTICLE_SCHEMA_HINT;
-  return `あなたはSEOコンテンツ作成のアシスタントです。必ず以下のJSON形式のみで出力してください。前置き・説明文・マークダウンのコードフェンスは一切不要です。JSON以外の文字を出力しないでください。\n\n${schema}`;
+  let prompt = `あなたはSEOコンテンツ作成のアシスタントです。必ず以下のJSON形式のみで出力してください。前置き・説明文・マークダウンのコードフェンスは一切不要です。JSON以外の文字を出力しないでください。\n\n${schema}`;
+  if (rules.length > 0) {
+    prompt += `\n\n過去の却下・修正依頼から学んだ注意点（必ず守ること）:\n${rules.map((r) => `- ${r}`).join("\n")}`;
+  }
+  return prompt;
 }
 
 /**
@@ -95,6 +105,11 @@ function normalizeGenerated(raw: Record<string, unknown>, contentType: string): 
  * job_runs INSERT時にnotify_llm_generate_job()トリガー(0010_llm_generate_trigger.sql)
  * から即座に呼ばれる。process-publish/route.tsと同じ設計方針:
  * 認可はX-Generate-Secretヘッダーのみ、常に200を返す、冪等性はstatus状態機械で担保。
+ *
+ * Phase7でmode('new'|'revise')に対応。'revise'は既存下書きの最新バージョン+
+ * review_comments(revision/rejection)を踏まえてAIに書き直させる
+ * （Phase4のルールベース版runGenerateFromCommentsのLLM版）。
+ * inputにmodeがない場合は'new'として扱う(Phase6時点の呼び出しとの後方互換)。
  */
 export async function POST(req: Request) {
   const secret = req.headers.get("x-generate-secret");
@@ -121,11 +136,12 @@ export async function POST(req: Request) {
 
   await admin.from("job_runs").update({ status: "processing" }).eq("id", jobId);
 
-  const input = job.input as { topic?: string; content_type?: string } | null;
+  const input = job.input as { topic?: string; content_type?: string; mode?: string } | null;
   const topic = input?.topic;
   const contentType = input?.content_type;
+  const mode = input?.mode === "revise" ? "revise" : "new";
 
-  if (!topic || !contentType) {
+  if (!contentType || (mode === "new" && !topic)) {
     await admin
       .from("job_runs")
       .update({
@@ -138,33 +154,42 @@ export async function POST(req: Request) {
   }
 
   try {
-    const apiKey = process.env.DEEPSEEK_API_KEY;
-    if (!apiKey) throw new Error("DEEPSEEK_API_KEYが設定されていません");
+    const rules = await fetchActiveRules(admin, contentType);
+    const systemPrompt = buildSystemPrompt(contentType, rules);
 
-    let res: Response;
-    try {
-      res = await fetch(DEEPSEEK_API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-        body: JSON.stringify({
-          model: DEEPSEEK_MODEL,
-          messages: [
-            { role: "system", content: buildSystemPrompt(contentType) },
-            { role: "user", content: `テーマ: ${topic}` },
-          ],
-        }),
-        signal: AbortSignal.timeout(DEEPSEEK_TIMEOUT_MS),
-      });
-    } catch (e) {
-      if (e instanceof Error && e.name === "TimeoutError") throw new Error("DeepSeek APIの応答がタイムアウトしました");
-      throw e;
+    let userPrompt: string;
+    let versionNumber: number;
+
+    if (mode === "revise") {
+      const { data: latestVersion, error: versionFetchError } = await admin
+        .from("draft_versions")
+        .select("title, body_markdown, version_number")
+        .eq("draft_id", job.draft_id)
+        .order("version_number", { ascending: false })
+        .limit(1)
+        .single();
+      if (versionFetchError || !latestVersion) throw new Error(`最新バージョンの取得に失敗しました: ${versionFetchError?.message}`);
+
+      const { data: comments, error: commentsError } = await admin
+        .from("review_comments")
+        .select("comment_type, body")
+        .eq("draft_id", job.draft_id)
+        .in("comment_type", ["revision", "rejection"])
+        .order("created_at", { ascending: false });
+      if (commentsError) throw new Error(`コメントの取得に失敗しました: ${commentsError.message}`);
+
+      const commentsList = (comments ?? [])
+        .map((c) => `- (${REVIEW_COMMENT_TYPE_LABEL[c.comment_type] ?? c.comment_type}) ${c.body}`)
+        .join("\n");
+
+      userPrompt = `テーマ: ${latestVersion.title}\n\n[前回のバージョン本文]\n${latestVersion.body_markdown}\n\n[レビューでの指摘事項]\n${commentsList || "(なし)"}\n\n上記の指摘を踏まえて本文を改善し、新しいバージョンとして書き直してください。`;
+      versionNumber = latestVersion.version_number + 1;
+    } else {
+      userPrompt = `テーマ: ${topic}`;
+      versionNumber = 1;
     }
 
-    if (!res.ok) throw new Error(`DeepSeek APIがエラーを返しました (${res.status})`);
-
-    const json = await res.json();
-    const content = json?.choices?.[0]?.message?.content;
-    if (typeof content !== "string") throw new Error("DeepSeek APIのレスポンス形式が想定外です");
+    const content = await callDeepSeekChat(systemPrompt, userPrompt, { timeoutMs: 60_000 });
 
     const raw = extractJson(content);
     if (!raw) throw new Error(`DeepSeek APIの応答をJSONとして解析できませんでした: ${content.slice(0, 200)}`);
@@ -176,7 +201,7 @@ export async function POST(req: Request) {
       .from("draft_versions")
       .insert({
         draft_id: job.draft_id,
-        version_number: 1,
+        version_number: versionNumber,
         title: generated.title,
         body_markdown: generated.body_markdown,
         seo_title: generated.seo_title,

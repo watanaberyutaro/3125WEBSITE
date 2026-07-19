@@ -1,4 +1,5 @@
 import { formatDateTime } from "@/lib/admin/format";
+import { PromoteToRuleButton } from "./PromoteToRuleButton";
 
 type Comment = {
   id: string;
@@ -19,11 +20,18 @@ function resolveDisplayName(profiles: Comment["profiles"]): string {
   return profile?.display_name ?? "不明なユーザー";
 }
 
-/** 承認/修正依頼/却下コメントの履歴を新しい順に表示する。誰が・いつ・何を判断したかを一覧化する。 */
-export function DraftCommentHistory({ comments }: { comments: Comment[] }) {
+/**
+ * 承認/修正依頼/却下コメントの履歴を新しい順に表示する。誰が・いつ・何を判断したかを一覧化する。
+ * contentTypeがarticle/service_pageの場合のみ、修正依頼・却下コメントに
+ * 「ルール化する」ボタンを表示する（rejection_rules.content_typeの制約と
+ * 一致させ、対応していない種別でボタンを押してサーバー側エラーになるのを防ぐ）。
+ */
+export function DraftCommentHistory({ comments, contentType }: { comments: Comment[]; contentType?: string }) {
   if (comments.length === 0) {
     return <p className="text-[13px] text-text-3">コメントはまだありません。</p>;
   }
+
+  const canPromoteToRule = contentType === "article" || contentType === "service_page";
 
   return (
     <div className="flex flex-col gap-3">
@@ -37,6 +45,11 @@ export function DraftCommentHistory({ comments }: { comments: Comment[] }) {
             <span>{formatDateTime(c.created_at)}</span>
           </div>
           <p className="whitespace-pre-wrap text-[13px] text-text-2">{c.body}</p>
+          {canPromoteToRule && (c.comment_type === "revision" || c.comment_type === "rejection") && (
+            <div className="mt-2">
+              <PromoteToRuleButton reviewCommentId={c.id} />
+            </div>
+          )}
         </div>
       ))}
     </div>

@@ -118,3 +118,13 @@ export async function getAdminDraftWithHistory(id: string) {
     jobRuns: jobRuns ?? [],
   };
 }
+
+export async function getRejectionRules() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("rejection_rules")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(error.message);
+  return data;
+}

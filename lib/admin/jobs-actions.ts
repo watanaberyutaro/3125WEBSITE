@@ -278,3 +278,45 @@ export async function retryGenerateJob(formData: FormData): Promise<void> {
 
   revalidatePath(`/admin/drafts/${draftId}`);
 }
+
+const RegenerateWithAISchema = z.object({
+  draftId: z.string().trim().min(1),
+});
+
+/**
+ * Phase4のruleGenerateFromComments(ルールベース、チェックリスト貼り付けのみ)の
+ * LLM版。既存下書きの最新バージョン+review_comments(revision/rejection)を
+ * process-generate/route.tsのmode='revise'で踏まえさせ、実際に本文を
+ * 書き直させる。needs_revisionの下書きにのみ許可する
+ * （RegenerateFromCommentsButtonと同じ表示条件）。
+ */
+export async function runRegenerateWithAI(formData: FormData): Promise<void> {
+  const staff = await requireStaff();
+  const parsed = RegenerateWithAISchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!parsed.success) throw new Error(parsed.error.issues.map((i) => i.message).join(" / "));
+  const { draftId } = parsed.data;
+
+  const supabase = await createClient();
+
+  const { data: draft, error: draftError } = await supabase
+    .from("drafts")
+    .select("content_type, status")
+    .eq("id", draftId)
+    .single();
+  if (draftError || !draft) throw new Error(`下書きの取得に失敗しました: ${draftError?.message}`);
+  if (draft.status !== "needs_revision") throw new Error("修正依頼中の下書きのみAIで書き直せます。");
+  if (!(GENERATE_WITH_AI_CONTENT_TYPES as readonly string[]).includes(draft.content_type)) {
+    throw new Error("この種別はまだAI書き直しに対応していません（対応済み: article, service_page）。");
+  }
+
+  const { error: jobError } = await supabase.from("job_runs").insert({
+    draft_id: draftId,
+    kind: "generate",
+    status: "pending",
+    input: { source: "llm", content_type: draft.content_type, mode: "revise" },
+    created_by: staff.id,
+  });
+  if (jobError) throw new Error(`生成ジョブの登録に失敗しました: ${jobError.message}`);
+
+  revalidatePath(`/admin/drafts/${draftId}`);
+}
