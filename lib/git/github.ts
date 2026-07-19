@@ -40,6 +40,32 @@ async function getFileSha(path: string): Promise<string | null> {
   return data.sha;
 }
 
+/**
+ * 対象パスの現在の内容をプレーンテキストで取得する。ファイルが存在しない
+ * 場合はnullを返す。
+ *
+ * Vercelのサーバーレス関数はビルド時に静的解析できない動的パス
+ * (DBのslugから組み立てたパス等)のfs.readFileをNext.jsのfile tracingで
+ * デプロイパッケージに含めないことがある（generateStaticParams経由の
+ * ビルド時読み込みは全リポジトリが揃っているため問題にならないが、
+ * リクエスト時のServer Action/Route Handlerでの読み込みは影響を受ける）。
+ * そのためcontent/services/*.mdの実行時読み込みは、ローカルファイル
+ * システムではなく常にGitHub側の実際のライブ内容をこの関数経由で読む
+ * （Vercelのデプロイタイミングにも依存しない）。
+ */
+export async function getFileContent(path: string): Promise<string | null> {
+  const { token, owner, repo, branch } = getConfig();
+  const res = await fetch(
+    `${GITHUB_API}/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}?ref=${branch}`,
+    { headers: { ...authHeaders(token), Accept: "application/vnd.github.raw+json" } },
+  );
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    throw new Error(`GitHub: ファイル内容の取得に失敗しました (${res.status} ${await res.text()})`);
+  }
+  return res.text();
+}
+
 export type PutFileResult = { commitSha: string; commitUrl: string };
 
 /**

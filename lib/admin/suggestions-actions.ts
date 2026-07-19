@@ -1,7 +1,5 @@
 "use server";
 
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
@@ -14,6 +12,7 @@ import {
 } from "./suggestions";
 import { parseFrontmatter } from "@/lib/content/frontmatter";
 import { callDeepSeekChat } from "@/lib/ai/deepseek";
+import { getFileContent } from "@/lib/git/github";
 
 const SUGGESTION_TARGET_CONTENT_TYPES = ["article", "service_page"] as const;
 
@@ -28,8 +27,11 @@ const GenerateSuggestionSchema = z.object({
  *
  * articleは/admin/articles/[id]/editで手動編集され得るため、draft_versionsではなく
  * articlesテーブルのライブな内容を読む。service_pageにはこの手動編集経路が
- * 存在しないため、実際にGitへコミットされたcontent/services/*.mdを直接読む
- * (draft_versionsではなく実ファイルを正とする)。
+ * 存在しないため、実際にGitへコミットされたcontent/services/*.mdを正とする
+ * (draft_versionsではなく実ファイルの内容を使う)。ただし読み込みはローカルの
+ * fsではなくGitHub API経由(lib/git/github.tsのgetFileContent)で行う —
+ * Vercelのサーバーレス関数は動的パスのfs読み込みをデプロイ時にbundleへ
+ * 含めないことがあるため、常にGitHub側のライブ内容を直接取得する。
  */
 export async function generateSuggestion(formData: FormData): Promise<void> {
   const staff = await requireStaff();
@@ -64,9 +66,7 @@ export async function generateSuggestion(formData: FormData): Promise<void> {
     checkable = buildCheckableFromArticle(article);
   } else {
     if (!draft.target_path) throw new Error("公開先パスが設定されていません。");
-    const slug = draft.target_path.replace(/^content\/services\//, "").replace(/\.md$/, "");
-    if (!/^[a-z0-9-]+$/.test(slug)) throw new Error("公開先パスの形式が想定外です。");
-    const raw = await readFile(path.join(process.cwd(), "content/services", `${slug}.md`), "utf-8").catch(() => null);
+    const raw = await getFileContent(draft.target_path);
     if (!raw) throw new Error("公開先のファイルが見つかりませんでした。");
     const parsedFile = parseFrontmatter(raw);
     if (!parsedFile) throw new Error("公開先ファイルのフロントマターを解析できませんでした。");
