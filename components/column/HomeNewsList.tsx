@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Reveal } from "@/components/motion/Reveal";
 import type { ArticleListItem } from "@/lib/column/types";
 
 function formatDate(iso: string | null) {
@@ -10,7 +11,7 @@ function formatDate(iso: string | null) {
 /** Home画面のお知らせ抜粋（旧 index.php の .hn__list 相当）。 */
 export function HomeNewsList({ articles }: { articles: ArticleListItem[] }) {
   return (
-    <ul className="hn__list reveal" role="list">
+    <Reveal as="ul" className="hn__list" role="list">
       {articles.map((a) => (
         <li className="hn__item" role="listitem" key={a.slug}>
           <Link href={`/column/${a.slug}`} className="hn__row hn__row--link">
@@ -33,6 +34,6 @@ export function HomeNewsList({ articles }: { articles: ArticleListItem[] }) {
           </Link>
         </li>
       ))}
-    </ul>
+    </Reveal>
   );
 }

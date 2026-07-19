@@ -14,6 +14,7 @@ type RevealProps = {
   /** 実際に描画するタグ。ラッパーdivを増やさず、その要素自体にreveal挙動を付与する。 */
   as?: RevealTag;
   id?: string;
+  role?: string;
 };
 
 const variantClass = { up: "reveal", left: "reveal-l", right: "reveal-r" } as const;
@@ -32,6 +33,7 @@ export function Reveal({
   className,
   as = "div",
   id,
+  role,
 }: RevealProps) {
   const ref = useRef<HTMLElement>(null);
 
@@ -60,7 +62,7 @@ export function Reveal({
 
   const Tag = as as "div";
   return (
-    <Tag ref={ref as React.RefObject<HTMLDivElement>} className={classes} id={id}>
+    <Tag ref={ref as React.RefObject<HTMLDivElement>} className={classes} id={id} role={role}>
       {children}
     </Tag>
   );

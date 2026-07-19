@@ -23,9 +23,16 @@ export function Cursor() {
     let ty = cy;
     let raf = 0;
 
+    // 初回のmousemoveが発火するまでは非表示にする。表示したままだと、
+    // 実際のポインタがまだ一度も動いていない（ページ読み込み直後、
+    // トラックパッドのジェスチャーでOSカーソルを動かさずスクロールした場合等）
+    // 状態でも画面中央に固定の緑ドットが表示され、コンテンツ上に浮いた
+    // ゴミのように見えてしまう。
+    cursor.style.opacity = "0";
     const handleMove = (e: MouseEvent) => {
       tx = e.clientX;
       ty = e.clientY;
+      cursor.style.opacity = "1";
     };
     document.addEventListener("mousemove", handleMove, { passive: true });
 
