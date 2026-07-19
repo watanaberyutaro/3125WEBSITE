@@ -89,13 +89,26 @@
  * 公開サイト全体の余白が消える別の不具合を引き起こした。
  * :where()は引数の詳細度を常にゼロとして扱うため、除外ロジックはそのままに
  * 詳細度だけを無条件の * と同じ(詳細度ゼロ)に戻せる。
+ *
+ * ただし上記は「legacy-site.css（レイヤーなし）との詳細度競合」の話であり、
+ * このリセット自体がレイヤーなしのままだと、公開サイト側でTailwindの余白
+ * ユーティリティを直接使うコンポーネント（目次 components/column/TableOfContents.tsx
+ * のp-6、FAQ components/column/FaqSection.tsx のpx-*/mb-*/pb-* 等）に対しては、
+ * 詳細度に関係なくこのリセットが常に勝ってしまい、paddingが0に潰れる不具合が
+ * 実際に発生した（管理画面と同じ問題の公開サイト版。当時は公開サイド新規
+ * コンポーネントがTailwindユーティリティで余白を組む前提がなかったため
+ * 顕在化していなかった）。@layer base で囲むことで、詳細度ロジックは一切
+ * 変えずに「Tailwindのutilitiesレイヤーに対してだけ」正しく負けるようにする
+ * （legacy-site.css（レイヤーなし）に対する優先度は不変）。
  */
-:where(*:not(#admin-root, #admin-root *)),
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@layer base {
+  :where(*:not(#admin-root, #admin-root *)),
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 }
 
 html {
