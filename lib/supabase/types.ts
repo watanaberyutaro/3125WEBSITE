@@ -60,6 +60,7 @@ export type Database = {
           seo_description: string | null
           seo_title: string | null
           slug: string
+          source_draft_id: string | null
           source_link: string | null
           status: string
           title: string
@@ -80,6 +81,7 @@ export type Database = {
           seo_description?: string | null
           seo_title?: string | null
           slug: string
+          source_draft_id?: string | null
           source_link?: string | null
           status?: string
           title: string
@@ -100,6 +102,7 @@ export type Database = {
           seo_description?: string | null
           seo_title?: string | null
           slug?: string
+          source_draft_id?: string | null
           source_link?: string | null
           status?: string
           title?: string
@@ -111,6 +114,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "articles_source_draft_id_fkey"
+            columns: ["source_draft_id"]
+            isOneToOne: false
+            referencedRelation: "drafts"
             referencedColumns: ["id"]
           },
         ]
@@ -242,6 +252,51 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      improvement_suggestions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          draft_id: string
+          id: string
+          issues: Json
+          status: string
+          suggestion_text: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          draft_id: string
+          id?: string
+          issues?: Json
+          status?: string
+          suggestion_text?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          draft_id?: string
+          id?: string
+          issues?: Json
+          status?: string
+          suggestion_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "improvement_suggestions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "improvement_suggestions_draft_id_fkey"
+            columns: ["draft_id"]
+            isOneToOne: false
+            referencedRelation: "drafts"
             referencedColumns: ["id"]
           },
         ]

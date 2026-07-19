@@ -22,6 +22,10 @@ export async function callDeepSeekChat(
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
         model: DEEPSEEK_MODEL,
+        // max_tokens未指定時のデフォルトでは、mode='revise'のように前回本文+
+        // コメントを踏まえた長い書き直しを依頼すると応答が途中で切れ、JSON
+        // として不完全になることが実測で判明した。明示的に余裕を持たせる。
+        max_tokens: 8192,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },

@@ -128,3 +128,37 @@ export async function getRejectionRules() {
   if (error) throw new Error(error.message);
   return data;
 }
+
+/**
+ * 改善提案の対象となる下書き(article/service_pageのみ、公開済みまたは
+ * 修正依頼中)を、各下書きの最新の改善提案とあわせて取得する。
+ * 出自不明のレガシーコンテンツ（このAIパイプラインを経由していないもの）は
+ * drafts行が存在しないため対象外（Phase8の明示的なスコープ判断）。
+ */
+export async function getPublishedDraftsWithSuggestions() {
+  const supabase = await createClient();
+
+  const { data: drafts, error: draftsError } = await supabase
+    .from("drafts")
+    .select("*")
+    .in("status", ["published", "needs_revision"])
+    .in("content_type", ["article", "service_page"])
+    .order("updated_at", { ascending: false });
+  if (draftsError) throw new Error(draftsError.message);
+  if (!drafts || drafts.length === 0) return [];
+
+  const { data: suggestions, error: suggestionsError } = await supabase
+    .from("improvement_suggestions")
+    .select("*")
+    .in(
+      "draft_id",
+      drafts.map((d) => d.id),
+    )
+    .order("created_at", { ascending: false });
+  if (suggestionsError) throw new Error(suggestionsError.message);
+
+  return drafts.map((draft) => ({
+    draft,
+    latestSuggestion: (suggestions ?? []).find((s) => s.draft_id === draft.id) ?? null,
+  }));
+}

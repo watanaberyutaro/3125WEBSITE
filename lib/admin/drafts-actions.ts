@@ -184,12 +184,18 @@ export type ReviewActionState = { error?: string } | undefined;
  * （次回生成・NGパターン抽出に使うため空コメントを許可しない）。
  *
  * 承認(approve)時の公開方法はcontent_typeで分岐する:
- *   - article: 既存のarticlesテーブルへ直接insertし即座に公開する
+ *   - article: 既存のarticlesテーブルへ直接publishする
  *     （/columnはSupabaseから動的描画されるCMSデータのためGit不要）。
+ *     同じdraftからのarticles行が既にあれば(source_draft_id一致)UPDATE、
+ *     なければINSERT（フェーズ8で改善提案から公開済みdraftを再承認する
+ *     経路が生まれたため、再承認のたびに新規行を作って重複させないための
+ *     upsert。初回公開のみのdraftではINSERT一本の従来通りの挙動になる）。
  *   - それ以外(service_page等、実コード変更が必要な種別): publish_jobsへ
  *     ジョブを積むのみ。実際のGit pushはSupabase側のpg_netトリガーが
  *     app/api/jobs/process-publish を非同期に叩いて行う
  *     （0008_publish_jobs.sql参照）。ここではジョブ登録までしか行わない。
+ *     putFile()はsha検索によるcreate-or-update方式のため、再承認は
+ *     自然に同一ファイルの上書き更新になり、この分岐の修正は不要。
  */
 export async function reviewDraft(_prev: ReviewActionState, formData: FormData): Promise<ReviewActionState> {
   const staff = await requireStaff();
@@ -226,16 +232,38 @@ export async function reviewDraft(_prev: ReviewActionState, formData: FormData):
         return { error: `バージョンの取得に失敗しました: ${versionError?.message}` };
       }
 
-      const { error: articleError } = await supabase.from("articles").insert({
-        slug: slugify(version.title),
-        title: version.title,
-        body_markdown: version.body_markdown,
-        seo_title: version.seo_title,
-        seo_description: version.seo_description,
-        faq: version.faq,
-        status: "published",
-        published_at: new Date().toISOString(),
-      });
+      const { data: existingArticle } = await supabase
+        .from("articles")
+        .select("id")
+        .eq("source_draft_id", draftId)
+        .maybeSingle();
+
+      const articleError = existingArticle
+        ? (
+            await supabase
+              .from("articles")
+              .update({
+                title: version.title,
+                body_markdown: version.body_markdown,
+                seo_title: version.seo_title,
+                seo_description: version.seo_description,
+                faq: version.faq,
+              })
+              .eq("id", existingArticle.id)
+          ).error
+        : (
+            await supabase.from("articles").insert({
+              slug: slugify(version.title),
+              title: version.title,
+              body_markdown: version.body_markdown,
+              seo_title: version.seo_title,
+              seo_description: version.seo_description,
+              faq: version.faq,
+              status: "published",
+              published_at: new Date().toISOString(),
+              source_draft_id: draftId,
+            })
+          ).error;
       if (articleError) {
         return { error: `記事の公開に失敗しました: ${articleError.message}` };
       }
