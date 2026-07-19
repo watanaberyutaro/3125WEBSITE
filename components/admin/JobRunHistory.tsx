@@ -27,9 +27,11 @@ function isReviewOutput(output: unknown): output is { passed: boolean; issues: s
 }
 
 /**
- * research/generate/reviewのjob_runs履歴。Phase4時点では全て同期処理のため、
- * PublishJobHistoryと異なり自動リフレッシュコンポーネントは不要
- * （redirect後のページロードで既に最終状態が反映されているため）。
+ * research/generate/reviewのjob_runs履歴。Phase4のルールベース生成・レビュー
+ * チェックは同期処理のため、PublishJobHistoryと異なりこのコンポーネント自体には
+ * 自動リフレッシュ機構を持たない（redirect後のページロードで最終状態が反映される）。
+ * Phase6で追加したDeepSeek API経由の非同期generateジョブの進捗表示は、
+ * 呼び出し側（drafts/[id]/page.tsx）でJobRunsAutoRefreshを併用することで対応する。
  */
 export function JobRunHistory({ jobRuns }: { jobRuns: JobRun[] }) {
   if (jobRuns.length === 0) {

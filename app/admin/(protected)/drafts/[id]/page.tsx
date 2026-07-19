@@ -12,6 +12,8 @@ import { RetryPublishButton } from "@/components/admin/RetryPublishButton";
 import { JobRunHistory } from "@/components/admin/JobRunHistory";
 import { RegenerateFromCommentsButton } from "@/components/admin/RegenerateFromCommentsButton";
 import { RunReviewCheckButton } from "@/components/admin/RunReviewCheckButton";
+import { JobRunsAutoRefresh } from "@/components/admin/JobRunsAutoRefresh";
+import { RetryGenerateButton } from "@/components/admin/RetryGenerateButton";
 
 const CONTENT_TYPE_LABEL: Record<string, string> = {
   article: "記事",
@@ -29,6 +31,20 @@ function formatReviewJobRunSummary(job: { output: unknown }): string {
   return passed ? "問題なし" : `${issues.length}件の指摘あり`;
 }
 
+type LlmGenerateInput = { source?: string; topic?: string; content_type?: string };
+
+/** Phase4のルールベース生成は常にsucceeded/failedを即座に挿入するため、
+ * pending/processingで残っているgenerateジョブは構造上AI Gateway経由のもののみ。 */
+function isLlmGenerateInput(input: unknown): input is LlmGenerateInput {
+  return typeof input === "object" && input !== null && (input as LlmGenerateInput).source === "llm";
+}
+
+const GENERATE_STALE_THRESHOLD_MS = 6 * 60 * 1000;
+
+function isStaleProcessing(job: { status: string; created_at: string }): boolean {
+  return job.status === "processing" && Date.now() - new Date(job.created_at).getTime() > GENERATE_STALE_THRESHOLD_MS;
+}
+
 export default async function DraftDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const result = await getAdminDraftWithHistory(id);
@@ -40,9 +56,21 @@ export default async function DraftDetailPage({ params }: { params: Promise<{ id
   const latestFailedJob = publishJobs.find((j) => j.status === "failed");
   const latestReviewJobRun = jobRuns.find((j) => j.kind === "review");
 
+  const generateJobRuns = jobRuns.filter((j) => j.kind === "generate" && isLlmGenerateInput(j.input));
+  const latestGenerateJobRun = generateJobRuns[0];
+  const hasPendingGenerateJob = generateJobRuns.some(
+    (j) => (j.status === "pending" || j.status === "processing") && !isStaleProcessing(j),
+  );
+  // 再試行は最新の生成試行のみを対象にする（過去の失敗履歴に引きずられないように）
+  const retryEligibleGenerateJob =
+    latestGenerateJobRun && (latestGenerateJobRun.status === "failed" || isStaleProcessing(latestGenerateJobRun))
+      ? latestGenerateJobRun
+      : undefined;
+
   return (
     <div className="flex max-w-3xl flex-col gap-8">
       <PublishJobAutoRefresh hasPendingJob={hasPendingJob} />
+      <JobRunsAutoRefresh hasPendingJob={hasPendingGenerateJob} />
 
       <div>
         <p className="mb-1 font-mono text-[11px] tracking-[0.06em] text-text-3 uppercase">
@@ -64,7 +92,17 @@ export default async function DraftDetailPage({ params }: { params: Promise<{ id
         <h2 className="font-mono text-[12px] tracking-[0.06em] text-text-3 uppercase">
           エージェント実行履歴（調査・生成・レビュー）
         </h2>
+        {hasPendingGenerateJob && (
+          <p className="text-[13px] text-text-3">AI Gatewayで生成中です（数十秒〜数分かかります。自動更新されます）…</p>
+        )}
         <JobRunHistory jobRuns={jobRuns} />
+        {retryEligibleGenerateJob && isLlmGenerateInput(retryEligibleGenerateJob.input) && (
+          <RetryGenerateButton
+            draftId={draft.id}
+            topic={retryEligibleGenerateJob.input.topic ?? ""}
+            contentType={retryEligibleGenerateJob.input.content_type ?? draft.content_type}
+          />
+        )}
       </section>
 
       {draft.status === "needs_revision" && latestVersion && (

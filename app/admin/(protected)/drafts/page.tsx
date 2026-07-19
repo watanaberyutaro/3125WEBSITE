@@ -34,12 +34,20 @@ export default async function AdminDraftsPage({
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl font-bold text-text">下書き（承認ワークフロー）</h1>
-        <Link
-          href="/admin/drafts/new"
-          className="bg-green px-4 py-2 font-mono text-[12px] tracking-[0.06em] text-white uppercase"
-        >
-          + 新規下書き
-        </Link>
+        <div className="flex gap-3">
+          <Link
+            href="/admin/drafts/generate"
+            className="border border-green px-4 py-2 font-mono text-[12px] tracking-[0.06em] text-green uppercase"
+          >
+            AIで生成する
+          </Link>
+          <Link
+            href="/admin/drafts/new"
+            className="bg-green px-4 py-2 font-mono text-[12px] tracking-[0.06em] text-white uppercase"
+          >
+            + 新規下書き
+          </Link>
+        </div>
       </div>
 
       {saved && <p className="border border-green bg-green-4 px-4 py-2 text-[13px] text-green">保存しました。</p>}

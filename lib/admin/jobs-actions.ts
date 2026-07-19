@@ -174,3 +174,107 @@ export async function runReviewCheck(formData: FormData): Promise<void> {
 
   revalidatePath(`/admin/drafts/${draftId}`);
 }
+
+const GENERATE_WITH_AI_CONTENT_TYPES = ["article", "service_page"] as const;
+
+const GenerateWithAISchema = z
+  .object({
+    content_type: z.enum(GENERATE_WITH_AI_CONTENT_TYPES),
+    topic: z.string().trim().min(1, "テーマは必須です"),
+    target_path: z.string().trim().optional().default(""),
+  })
+  .refine((data) => data.content_type !== "service_page" || data.target_path, {
+    message: "service_pageの場合は公開先パスの入力が必須です",
+    path: ["target_path"],
+  });
+
+export type GenerateWithAIState = { error?: string } | undefined;
+
+/**
+ * トピックからAI Gateway(ローカルLLM)経由で下書きを新規生成する。
+ * この関数自体はdraftsとjob_runs(status='pending')を挿入するだけで即座に
+ * returnする — 実際の生成は0010_llm_generate_trigger.sqlのpg_netトリガーが
+ * app/api/jobs/process-generate/route.tsを非同期に起動して行う
+ * （AI Gatewayの応答が数十秒〜300秒近くかかるため、Server Action内で
+ * 同期的に待つとブラウザをブロックしてしまう）。
+ *
+ * content_typeをarticle/service_pageのみに絞るのは、Phase5で確立した
+ * 「まだ描画面がないcta_copy等はreviewDraftの承認時点でブロックする」という
+ * 境界と整合させるため（生成できても承認できないものを作らせない）。
+ */
+export async function runGenerateWithAI(
+  _prev: GenerateWithAIState,
+  formData: FormData,
+): Promise<GenerateWithAIState> {
+  const staff = await requireStaff();
+
+  const parsed = GenerateWithAISchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!parsed.success) {
+    return { error: parsed.error.issues.map((i) => i.message).join(" / ") };
+  }
+  const { content_type, topic, target_path } = parsed.data;
+
+  const supabase = await createClient();
+
+  const { data: draft, error: draftError } = await supabase
+    .from("drafts")
+    .insert({
+      content_type,
+      target_path: target_path || null,
+      title: topic,
+      status: "draft",
+      created_by: staff.id,
+    })
+    .select("id")
+    .single();
+
+  if (draftError || !draft) {
+    return { error: `下書きの作成に失敗しました: ${draftError?.message}` };
+  }
+
+  const { error: jobError } = await supabase.from("job_runs").insert({
+    draft_id: draft.id,
+    kind: "generate",
+    status: "pending",
+    input: { source: "llm", topic, content_type },
+    created_by: staff.id,
+  });
+
+  if (jobError) {
+    return { error: `生成ジョブの登録に失敗しました: ${jobError.message}` };
+  }
+
+  revalidatePath("/admin/drafts");
+  redirect(`/admin/drafts/${draft.id}?generating=1`);
+}
+
+const RetryGenerateSchema = z.object({
+  draftId: z.string().trim().min(1),
+  topic: z.string().trim().min(1),
+  contentType: z.enum(GENERATE_WITH_AI_CONTENT_TYPES),
+});
+
+/**
+ * 失敗した、またはprocessingのまま詰まったAI生成ジョブを再試行する。
+ * retryPublishJob(drafts-actions.ts)と同じ理由で、既存行を書き換えず
+ * 新しいjob_runs行をINSERTする（INSERTのたびにpg_netトリガーが起動するため、
+ * UPDATEでは再処理されない）。
+ */
+export async function retryGenerateJob(formData: FormData): Promise<void> {
+  const staff = await requireStaff();
+  const parsed = RetryGenerateSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!parsed.success) throw new Error(parsed.error.issues.map((i) => i.message).join(" / "));
+  const { draftId, topic, contentType } = parsed.data;
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("job_runs").insert({
+    draft_id: draftId,
+    kind: "generate",
+    status: "pending",
+    input: { source: "llm", topic, content_type: contentType },
+    created_by: staff.id,
+  });
+  if (error) throw new Error(error.message);
+
+  revalidatePath(`/admin/drafts/${draftId}`);
+}
