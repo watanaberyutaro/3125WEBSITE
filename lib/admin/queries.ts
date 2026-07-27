@@ -162,3 +162,15 @@ export async function getPublishedDraftsWithSuggestions() {
     latestSuggestion: (suggestions ?? []).find((s) => s.draft_id === draft.id) ?? null,
   }));
 }
+
+/** 未対応(pending)の記事ネタ一覧。使用済み・却下済みは一覧をシンプルに保つため表示しない。 */
+export async function getArticleTopicIdeas() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("article_topic_ideas")
+    .select("*")
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(error.message);
+  return data;
+}

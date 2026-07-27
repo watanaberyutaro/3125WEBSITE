@@ -44,6 +44,51 @@ export type Database = {
           },
         ]
       }
+      article_topic_ideas: {
+        Row: {
+          brief: string
+          created_at: string
+          created_by: string | null
+          id: string
+          status: string
+          title: string
+          used_draft_id: string | null
+        }
+        Insert: {
+          brief: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          status?: string
+          title: string
+          used_draft_id?: string | null
+        }
+        Update: {
+          brief?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          status?: string
+          title?: string
+          used_draft_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_topic_ideas_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "article_topic_ideas_used_draft_id_fkey"
+            columns: ["used_draft_id"]
+            isOneToOne: false
+            referencedRelation: "drafts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       articles: {
         Row: {
           body_markdown: string
