@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireStaff } from "@/lib/auth/session";
-import { slugify } from "./slug";
+import { generateUniqueArticleSlug, slugify } from "./slug";
 
 const ArticleSchema = z.object({
   slug: z.string().trim().optional().default(""),
@@ -92,9 +92,9 @@ export async function createArticle(
     return { error: parsed.error.issues.map((i) => i.message).join(" / ") };
   }
   const data = parsed.data;
-  const slug = data.slug ? slugify(data.slug) : slugify(data.title);
-
   const supabase = await createClient();
+  const slug = await generateUniqueArticleSlug(supabase, data.slug || data.title);
+
   const { data: created, error } = await supabase
     .from("articles")
     .insert({
@@ -151,10 +151,10 @@ export async function updateArticle(
     .eq("id", id)
     .single();
   const slug = data.slug
-    ? slugify(data.slug)
+    ? await generateUniqueArticleSlug(supabase, data.slug, id)
     : existing?.slug
       ? slugify(existing.slug)
-      : slugify(data.title);
+      : await generateUniqueArticleSlug(supabase, data.title, id);
   const publishedAt =
     data.status === "published" ? (existing?.published_at ?? new Date().toISOString()) : existing?.published_at;
 

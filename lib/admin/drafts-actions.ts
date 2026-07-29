@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireStaff } from "@/lib/auth/session";
-import { slugify } from "./slug";
+import { generateUniqueArticleSlug } from "./slug";
 
 /**
  * フェーズ5で確定した境界ポリシー（曖昧にしない）:
@@ -253,7 +253,7 @@ export async function reviewDraft(_prev: ReviewActionState, formData: FormData):
           ).error
         : (
             await supabase.from("articles").insert({
-              slug: slugify(version.title),
+              slug: await generateUniqueArticleSlug(supabase, version.title),
               title: version.title,
               body_markdown: version.body_markdown,
               seo_title: version.seo_title,
