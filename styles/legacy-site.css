@@ -259,10 +259,10 @@
 }
 
 .nav__logo-num {
-  font-family: var(--font-display);
-  font-size: 1.6rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: var(--font-script);
+  font-size: 2rem;
+  font-weight: 400;
+  letter-spacing: 0;
   color: var(--text);
   transition: color 0.2s;
 }
@@ -459,14 +459,14 @@
   right: 25%;
   top: 50%;
   transform: translateY(-50%);
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-script);
   font-size: clamp(8rem, 35vw, 20rem);
-  font-weight: 800;
+  font-weight: 400;
   color: rgba(250,250,248,0.04);
   line-height: 1;
   pointer-events: none;
   user-select: none;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   white-space: nowrap;
   opacity: 0;
   transition: opacity 0.7s ease 0.5s;
@@ -642,10 +642,10 @@
 }
 
 .footer__logo {
-  font-family: var(--font-display);
-  font-size: 2.4rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: var(--font-script);
+  font-size: 3rem;
+  font-weight: 400;
+  letter-spacing: 0;
   color: var(--white);
   display: block;
   margin-bottom: 6px;
@@ -872,15 +872,15 @@
   top: 50%;
   right: -0.04em;
   transform: translateY(-50%);
-  font-family: var(--font-display);
-  font-weight: 700;
+  font-family: var(--font-script);
+  font-weight: 400;
   font-size: clamp(200px, 38vw, 520px);
   color: transparent;
   -webkit-text-stroke: 1px rgba(20,20,20,0.055);
   user-select: none;
   pointer-events: none;
   line-height: 0.85;
-  letter-spacing: -0.05em;
+  letter-spacing: 0;
   white-space: nowrap;
 }
 
@@ -2336,12 +2336,12 @@
 
 /* "3125" — large visible brand in dark text */
 .loader__brand {
-  font-family: var(--font-display);
+  font-family: var(--font-script);
   font-size: clamp(80px, 16vw, 160px);
-  font-weight: 700;
+  font-weight: 400;
   color: var(--text);
   line-height: 0.85;
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
   margin-bottom: 8px;
   opacity: 0;
   animation: loader-brand-in 0.8s cubic-bezier(0.16,1,0.3,1) 0.18s forwards;
