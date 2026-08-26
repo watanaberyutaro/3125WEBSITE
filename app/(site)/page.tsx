@@ -140,7 +140,7 @@ export default async function HomePage() {
     getPublishedWorks(),
     getPublishedArticles().then((articles) => articles.slice(0, 5)),
   ]);
-  const carouselWorks = [...works].sort((a, b) => b.sortOrder - a.sortOrder).slice(0, 7);
+  const carouselWorks = works.slice(0, 7);
 
   return (
     <>

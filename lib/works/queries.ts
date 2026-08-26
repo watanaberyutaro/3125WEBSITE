@@ -56,7 +56,7 @@ export async function getPublishedWorks(filter: WorksFilter = {}): Promise<WorkL
     .from("works")
     .select(LIST_SELECT)
     .eq("status", "published")
-    .order("sort_order", { ascending: true });
+    .order("sort_order", { ascending: false });
 
   if (filter.q) {
     query = query.or(
