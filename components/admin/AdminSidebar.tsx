@@ -115,6 +115,12 @@ export function AdminSidebar({ staff }: { staff: StaffProfile }) {
             <p className="text-[13px] text-text">{staff.displayName ?? staff.email}</p>
             <p className="font-mono text-[10px] tracking-[0.06em] text-text-3 uppercase">{staff.role}</p>
           </div>
+          <Link
+            href="/"
+            className="block w-full border border-line px-3 py-2 text-left text-[12px] text-text-2 transition-colors hover:border-green hover:text-green"
+          >
+            サイトに戻る
+          </Link>
           <form action={logout}>
             <button
               type="submit"
