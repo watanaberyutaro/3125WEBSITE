@@ -8,6 +8,7 @@ const INQUIRY_LABELS: Record<string, string> = {
   content: "AIコンテンツ制作",
   video: "映像制作",
   web: "Webサイト制作",
+  "custom-system": "オーダーメイドシステム制作",
   other: "その他",
 };
 

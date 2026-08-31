@@ -8,7 +8,7 @@ import { buildMetadata } from "@/lib/seo/metadata";
 
 const TITLE = "AIマンツーマン教育・AI導入支援・AI研修";
 const DESCRIPTION =
-  "3125株式会社のサービス — AIマンツーマン教育・AI導入支援・AI研修・AIコンテンツ制作・映像制作・Web制作。ビジネスのAI活用をトータルサポートします。";
+  "3125株式会社のサービス — AIマンツーマン教育・AI導入支援・AI研修・AIコンテンツ制作・映像制作・Web制作・オーダーメイドシステム制作。ビジネスのAI活用をトータルサポートします。";
 
 export const metadata: Metadata = buildMetadata({ title: TITLE, description: DESCRIPTION, path: "/services" });
 
@@ -152,6 +152,28 @@ const SERVICES = [
       </svg>
     ),
   },
+  {
+    id: "custom-system",
+    num: "07",
+    en: "Custom System Development",
+    title: "オーダーメイドシステム制作",
+    body: "既存の汎用ツールでは対応しきれない業務課題に対して、要件定義から設計・開発・テスト・運用保守までを一貫して担当するオーダーメイドの業務システム開発サービスです。社内の業務フローや商習慣に合わせてフルスクラッチで構築し、生産性向上と競争優位性の獲得を支援します。",
+    ctaLabel: "オーダーメイドシステム制作を相談する",
+    list: [
+      "業務システム・基幹システムの要件定義・設計",
+      "業務効率化ツール・社内アプリの開発",
+      "既存システムとのAPI連携・データ連携開発",
+      "AIを組み込んだ業務自動化システムの構築",
+      "既存システムのリプレイス・モダナイゼーション",
+      "開発後の保守・運用・機能追加サポート",
+    ],
+    icon: (
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <rect x="2" y="6" width="28" height="20" rx="2" stroke="currentColor" strokeWidth="1.4" />
+        <path d="M10 14l-4 4 4 4M17 14l4 4-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" opacity="0.6" />
+      </svg>
+    ),
+  },
 ];
 
 export default function ServicesPage() {
@@ -162,7 +184,7 @@ export default function ServicesPage() {
         eyebrowNum="Srv"
         label="Services"
         title="支援の全領域へ。"
-        description="AI教育・導入支援・研修から映像制作・Web制作まで、ビジネスの課題を6つのサービスでトータルサポートします。"
+        description="AI教育・導入支援・研修から映像制作・Web制作・オーダーメイドシステム制作まで、ビジネスの課題を7つのサービスでトータルサポートします。"
       />
 
       {SERVICES.map((svc, i) => (

@@ -133,6 +133,18 @@ const SERVICES = [
       </svg>
     ),
   },
+  {
+    num: "07",
+    title: "オーダーメイドシステム制作",
+    body: "業務課題に合わせて設計するオリジナルの業務システム・アプリケーション開発。要件定義から設計・開発・運用保守まで、ビジネスに最適化されたシステムをフルスクラッチで構築します。",
+    href: "/services#custom-system",
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+        <rect x="2" y="5" width="24" height="18" rx="2" stroke="currentColor" strokeWidth="1.4" />
+        <path d="M8 12l-3 3 3 3M14 12l3 3-3 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" opacity="0.6" />
+      </svg>
+    ),
+  },
 ];
 
 export default async function HomePage() {

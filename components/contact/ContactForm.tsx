@@ -14,6 +14,7 @@ const INQUIRY_OPTIONS = [
   { value: "content", label: "AIコンテンツ制作のご依頼" },
   { value: "video", label: "映像制作のご依頼" },
   { value: "web", label: "Webサイト制作のご依頼" },
+  { value: "custom-system", label: "オーダーメイドシステム制作のご依頼" },
   { value: "other", label: "その他・ご質問" },
 ];
 
