@@ -27,6 +27,5 @@ export const siteConfig = {
   representative: { name: "渡邊 隆太郎", nameEn: "Ryutaro Watanabe" },
   directors: [
     { name: "大須 はるか", nameEn: "Haruka Osu" },
-    { name: "佐藤 一斗", nameEn: "Kazuto Sato" },
   ],
 } as const;

@@ -30,13 +30,6 @@ const TEAM = [
     nameEn: siteConfig.directors[0].nameEn,
     bio: "AI研修プログラムの設計・運営とAIコンテンツ制作を担当。受講者の習熟度に合わせたカリキュラム開発を得意とし、組織全体のAIリテラシー向上を実現する。",
   },
-  {
-    initial: "I",
-    role: "Director",
-    name: siteConfig.directors[1].name,
-    nameEn: siteConfig.directors[1].nameEn,
-    bio: "AI活用戦略の策定と業務自動化の導入支援を担当。データ分析とプロセス設計を組み合わせ、クライアントの業務効率化と競争力強化を実現する。",
-  },
 ];
 
 export default function AboutPage() {
