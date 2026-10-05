@@ -10,7 +10,6 @@ export const siteConfig = {
   description: "AIマンツーマン教育・AI導入支援・AI研修を通じて、ビジネスのAI活用を支援するAIエージェンシー。",
   locale: "ja_JP",
   foundingDate: "2024-05-27",
-  capital: "1000000円",
   phone: "090-1000-1930",
   phoneHref: "tel:09010001930",
   email: "info@3125.jp",

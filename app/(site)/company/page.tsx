@@ -73,14 +73,6 @@ export default function CompanyPage() {
               </div>
               <div className="info-row" role="row">
                 <span className="info-key" role="rowheader">
-                  資本金
-                </span>
-                <span className="info-val" role="cell">
-                  {siteConfig.capital}
-                </span>
-              </div>
-              <div className="info-row" role="row">
-                <span className="info-key" role="rowheader">
                   所在地
                 </span>
                 <span className="info-val" role="cell">
