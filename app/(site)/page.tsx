@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { HomeCta } from "@/components/layout/HomeCta";
+import { WorksGrid } from "@/components/works/WorksGrid";
 import { HomeNewsList } from "@/components/column/HomeNewsList";
 import { getPublishedWorks } from "@/lib/works/queries";
 import { getPublishedArticles } from "@/lib/column/queries";
@@ -420,38 +420,10 @@ export default async function HomePage() {
                 すべて見る <ArrowSvg />
               </Link>
             </div>
-            <div className="wgrid">
-              {gridWorks.map((w, i) => (
-                <Link className="wgrid__item work-card" href={`/works/${w.slug}`} key={w.slug}>
-                  <div className="wgrid__thumb work-card__thumb">
-                    {w.coverImageUrl && (
-                      <Image
-                        src={w.coverImageUrl}
-                        alt={`${w.clientName} ${w.projectName}`}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                        loading={i < 3 ? "eager" : "lazy"}
-                        style={{ objectFit: "cover" }}
-                      />
-                    )}
-                  </div>
-                  <div className="work-card__top">
-                    <span className="wgrid__cat">{w.category?.name ?? "Web"}</span>
-                    <span>{w.year}</span>
-                  </div>
-                  <p className="wgrid__num">{String(w.sortOrder).padStart(2, "0")}</p>
-                  <h3 className="wgrid__title">
-                    {w.clientName}
-                    <br />
-                    {w.projectName}
-                  </h3>
-                  <div className="wgrid__meta">
-                    <span>{w.industry?.name}</span>
-                    <span className="work-card__arrow">→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
+            <p className="wk-lede">
+              コーポレートサイトから採用サイト、映像、写真まで。目的と届けたい相手を起点に、企画から公開・運用までご一緒した仕事の記録です。ここでは新しいものから{gridWorks.length}件を掲載しています。
+            </p>
+            <WorksGrid works={gridWorks} layout="feature" />
           </section>
         </>
       )}

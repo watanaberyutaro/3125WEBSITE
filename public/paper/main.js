@@ -564,7 +564,9 @@
      WORKS FILTER
   ═══════════════════════════════════════════════════════════════ */
   function initWorksFilter() {
-    const filterBtns = document.querySelectorAll('.filter-btn');
+    /* 一覧のタブはリンク（サーバー側で絞り込む）なので対象外。data-filter を持つボタンだけ扱う。
+       リンクにも反応させると、クリックした瞬間に全カードが消えて遷移の幕越しに見えていた */
+    const filterBtns = document.querySelectorAll('.filter-btn[data-filter]');
     const workCards  = document.querySelectorAll('.work-card[data-cat]');
     if (!filterBtns.length) return;
 

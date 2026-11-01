@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { WorkCategoryRef } from "@/lib/works/types";
+import { workCategoryLabel } from "./workCopy";
 
 /**
  * カテゴリフィルタタブ。JS無しでも機能するようリンクとして実装し、
@@ -40,7 +41,7 @@ export function WorksFilter({
         role="tab"
         aria-selected={!activeCategory}
       >
-        All
+        すべて
       </Link>
       {categories.map((c) => (
         <Link
@@ -50,7 +51,7 @@ export function WorksFilter({
           role="tab"
           aria-selected={activeCategory === c.slug}
         >
-          {c.name}
+          {workCategoryLabel(c)}
         </Link>
       ))}
     </div>
