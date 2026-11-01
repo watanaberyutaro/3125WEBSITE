@@ -42,6 +42,13 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
   return (
     <>
       <script type="speculationrules" dangerouslySetInnerHTML={{ __html: SPECULATION_RULES }} />
+      {/* 外部CSSより先に効く地色。ページ切り替え直後の最初の描画が白にならないように、
+          紙の色（幕の続きなら黒）をここで決めておく */}
+      <style
+        dangerouslySetInnerHTML={{
+          __html: "html{background:#ece5d5}html.is-veiled{background:#1a1714}",
+        }}
+      />
       {/* 紙面版: 初回のみホームでオープニングを流す／シャッター遷移の続きを出す（描画前に判定） */}
       <script
         dangerouslySetInnerHTML={{

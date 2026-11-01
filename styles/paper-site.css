@@ -278,6 +278,12 @@ html.is-veiled::before {
   animation: veil-failsafe 0.3s 5s forwards;
 }
 @keyframes veil-failsafe { to { opacity: 0; visibility: hidden; } }
+
+/* ページ間の白い一瞬をなくす：対応ブラウザ（Chrome 126+ / Safari 18.2+）では、
+   新しいページが描けるまで前のページの最後の画（黒い幕と「3125」）を保持させる。
+   幕どうしの切り替えなので、標準のクロスフェードは切って即座に入れ替える */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
 .veil { position: fixed; inset: 0; z-index: 9998; visibility: hidden; pointer-events: none; }
 .veil.is-on { visibility: visible; pointer-events: all; }
 .veil__panel {
@@ -1328,7 +1334,8 @@ body::after {
 .article-body__image img { filter: grayscale(1) sepia(0.22) contrast(1.1); }
 
 /* chrome objects print like photos on newsprint */
-.chrome-canvas { filter: grayscale(1) sepia(0.28) contrast(1.08); }
+/* 立体模型は色材そのものを紙面の特色インキに合わせたので、フィルターはかけない
+   （全画面キャンバスへのフィルターはスクロール中の負荷にもなる） */
 
 /* ── Masthead ─────────────────────────────────────────────────── */
 .masthead {
@@ -2085,4 +2092,77 @@ nav[aria-label="パンくずリスト"] ol::before { content: "現在地　"; fo
   /* スマホでは2列に組む。語の途中で改行しない */
   .works-filter { display: grid; grid-template-columns: 1fr 1fr; width: 100%; border: 0; padding: 1px 0 0 1px; }
   .works-filter .filter-btn { margin: -1px 0 0 -1px; padding: 10px 14px; border: 1px solid var(--ink); text-align: center; }
+}
+
+/* ================================================================
+   ホームの余白を記事で埋める（第一面・三つの支援・社説・特集）
+================================================================ */
+/* 第一面：引用と「支援の主な内容」 */
+.front__lead { display: flex; flex-direction: column; }
+.front__pull {
+  margin: 18px 0 0; padding: 14px 0 12px;
+  border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink);
+}
+.front__pull p { font-family: var(--font-jp); font-size: clamp(17px, 1.5vw, 21px); font-weight: 800; line-height: 1.6; letter-spacing: 0.02em; }
+.front__pull cite { display: block; margin-top: 6px; font-size: 11.5px; font-style: normal; color: var(--mute); text-align: right; }
+.front__brief { margin-top: 16px; }
+.front__brief-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-family: var(--font-jp); font-size: 12px; font-weight: 800; letter-spacing: 0.2em; }
+.front__brief-head::before { content: ''; width: 8px; height: 8px; background: var(--ink); }
+.front__brief ul { display: grid; grid-template-columns: 1fr 1fr; gap: 0 22px; list-style: none; }
+.front__brief li { padding: 7px 0 7px 14px; border-bottom: 1px dotted var(--mute-2); font-size: 12.5px; line-height: 1.6; position: relative; }
+.front__brief li::before { content: '・'; position: absolute; left: 0; }
+.front__brief-more { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 12.5px; font-weight: 800; text-decoration: underline; text-underline-offset: 4px; }
+
+/* 三つの支援：その面に含まれるサービス名 */
+.front__teasers .pillar__svcs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 10px; }
+.front__teasers .pillar__svcs span { padding: 3px 8px; border: 1px solid var(--ink); font-size: 11.5px; font-weight: 700; line-height: 1.4; color: var(--ink); background: var(--paper); }
+
+/* 社説：小見出しと署名 */
+.intro__sub {
+  margin: 1.6em 0 0.6em; padding-top: 10px; border-top: 1px solid var(--ink);
+  font-family: var(--font-jp); font-size: 15px; font-weight: 800; letter-spacing: 0.04em;
+  break-after: avoid;
+}
+.intro__sign { margin-top: 1.4em; font-size: 12.5px; font-weight: 800; letter-spacing: 0.12em; text-align: right; }
+.intro__sign::before { content: '（'; }
+.intro__sign::after { content: '）'; }
+
+/* 特集：各サービスの主な内容と、面の末尾の囲み */
+.feature__points { margin: 10px 0 12px; list-style: none; }
+.feature__points li { position: relative; padding: 3px 0 3px 14px; font-size: 12.5px; line-height: 1.65; }
+.feature__points li::before { content: ''; position: absolute; left: 0; top: 0.85em; width: 6px; height: 1px; background: var(--ink); }
+.feature__note { margin-top: 18px; padding: 14px 16px 16px; border: 3px double var(--ink); }
+.feature__note-head { margin-bottom: 6px; font-family: var(--font-jp); font-size: 13px; font-weight: 800; letter-spacing: 0.12em; }
+.feature__note-body { font-size: 12.5px; line-height: 1.9; }
+
+/* フッターの大きな「3125」は右寄せ */
+.footer__mark { text-align: right; padding-right: 0.04em; }
+
+@media (max-width: 640px) {
+  .front__brief ul { grid-template-columns: 1fr; }
+}
+.front__note { margin-top: 16px; padding: 12px 14px 14px; border-top: 3px double var(--ink); border-bottom: 1px solid var(--ink); font-size: 12.5px; line-height: 1.95; text-align: justify; }
+.front__note-head { display: inline-block; margin-bottom: 6px; padding: 1px 8px; background: var(--ink); color: var(--paper); font-family: var(--font-jp); font-size: 11px; font-weight: 800; letter-spacing: 0.3em; }
+.intro__aside { order: 2; display: flex; flex-direction: column; min-width: 0; }
+.intro__mission { margin: 0 22px 22px; padding: 16px 4px 0; border-top: 3px double var(--ink); }
+.intro__mission-k { font-family: var(--font-en); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mute); }
+.intro__mission-q { margin: 6px 0 8px; font-family: var(--font-jp); font-size: clamp(20px, 1.8vw, 26px); font-weight: 800; line-height: 1.45; }
+.intro__mission-b { font-size: 12.5px; line-height: 1.9; }
+@media (max-width: 900px) {
+  .intro__aside { order: 0; }
+  .intro__mission { margin: 0 16px 16px; }
+}
+/* 面ごとの長さの差は、末尾の囲みを下に寄せて吸収する（三面の下端がそろう） */
+.feature__note { margin-top: auto; }
+.feature__ch > .feature__item:last-of-type { margin-bottom: 18px; }
+/* 包みの中では、挿絵を先・縦横比どおりの高さで（flex で潰れないように） */
+.intro__aside > .intro__visual { order: 0; flex: none; align-self: stretch; }
+/* 社説と特集のあいだの空きを詰める */
+.section.feature { padding-top: clamp(32px, 4vw, 56px); }
+.feature__note-list { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px dotted var(--mute-2); font-size: 12px; }
+.feature__note-list b { margin-right: 4px; font-weight: 800; letter-spacing: 0.2em; }
+.feature__note-list span { padding: 2px 8px; border: 1px solid var(--ink); font-weight: 700; }
+@media (max-width: 900px) {
+  /* 1段組では挿絵を横長にして、縦に間延びさせない */
+  .intro__aside > .intro__visual { aspect-ratio: 3 / 2; min-height: 0; }
 }

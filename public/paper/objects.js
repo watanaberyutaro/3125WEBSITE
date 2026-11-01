@@ -49,8 +49,9 @@ function studioEnvironment(renderer) {
 
 /* ── Geometry factory ── */
 class Helix extends THREE.Curve {
+  constructor(phase = 0) { super(); this.phase = phase; }
   getPoint(t, target = new THREE.Vector3()) {
-    const a = t * Math.PI * 2 * 2.6;
+    const a = t * Math.PI * 2 * 2.6 + this.phase;
     return target.set(Math.cos(a) * 0.85, (t - 0.5) * 3.0, Math.sin(a) * 0.85);
   }
 }
@@ -83,21 +84,58 @@ const GEOMETRY = {
   sphere: () => new THREE.SphereGeometry(1, 96, 64),
 };
 
-function buildShape(kind, chrome, ceramic) {
+/* 紙面の特色インキに合わせた配色（朱・山吹・藍＋白磁とクロム）。
+   色はそれぞれの支援の性格で振り分ける */
+function buildShape(kind, M) {
   const group = new THREE.Group();
+  if (kind === 'helix') {
+    /* まなぶ：二重らせん（藍と朱）を細い横木でつなぐ */
+    const seg = isSmall ? 220 : 360;
+    group.add(new THREE.Mesh(new THREE.TubeGeometry(new Helix(0), seg, 0.16, 28, false), M.indigo));
+    group.add(new THREE.Mesh(new THREE.TubeGeometry(new Helix(Math.PI), seg, 0.16, 28, false), M.red));
+    const rung = new THREE.CylinderGeometry(0.045, 0.045, 1.7, 12);
+    rung.rotateZ(Math.PI / 2);
+    for (let i = 1; i < 12; i++) {
+      const t = i / 12, a = t * Math.PI * 2 * 2.6;
+      const r = new THREE.Mesh(rung, M.chrome);
+      r.position.y = (t - 0.5) * 3.0;
+      r.rotation.y = -a;
+      group.add(r);
+    }
+    return group;
+  }
   if (kind === 'stack') {
+    /* つくる：色違いの板を少しずつずらして積む */
     const g = roundedBox(1.5, 0.14, 0.08);
     g.scale(1, 0.26, 1);
-    [-0.55, 0, 0.55].forEach((y, i) => {
-      const m = new THREE.Mesh(g, i === 1 ? ceramic : chrome);
-      m.position.y = y;
+    [M.indigo, M.ochre, M.ceramic].forEach((mat, i) => {
+      const m = new THREE.Mesh(g, mat);
+      m.position.y = -0.55 + i * 0.55;
       m.rotation.y = i * 0.35;
       group.add(m);
     });
+    const knob = new THREE.Mesh(new THREE.SphereGeometry(0.2, 48, 32), M.red);
+    knob.position.y = 0.92;
+    group.add(knob);
+    return group;
+  }
+  if (kind === 'orbit') {
+    /* つたえる：朱の核のまわりを、山吹とクロムの輪が回る（発信して広がる） */
+    group.add(new THREE.Mesh(new THREE.SphereGeometry(0.6, 96, 64), M.red));
+    const ringA = new THREE.Mesh(new THREE.TorusGeometry(1.05, 0.07, 32, 200), M.ochre);
+    ringA.rotation.set(1.15, 0.2, 0);
+    const ringB = new THREE.Mesh(new THREE.TorusGeometry(1.38, 0.045, 32, 220), M.chrome);
+    ringB.rotation.set(-0.9, 0.5, 0.3);
+    const moon = new THREE.Mesh(new THREE.SphereGeometry(0.14, 48, 32), M.indigo);
+    moon.position.set(1.38, 0, 0);
+    ringB.add(moon);
+    group.add(ringA, ringB);
+    group.userData.spin = [ringA, ringB];
     return group;
   }
   const make = GEOMETRY[kind] || GEOMETRY.knot;
-  const mesh = new THREE.Mesh(make(), kind === 'cone' ? ceramic : chrome);
+  const mesh = new THREE.Mesh(make(), kind === 'cone' ? M.ceramic : M.chrome);
+  const chrome = M.chrome;
   if (kind === 'cone') {
     /* half ceramic / half chrome like a machined part */
     const cap = new THREE.Mesh(new THREE.ConeGeometry(0.86, 0.5, 128, 1, true), chrome);
@@ -146,7 +184,13 @@ function init() {
 
   const env = studioEnvironment(renderer);
   const chrome = new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 1, roughness: 0.09, envMap: env, envMapIntensity: 1.35 });
-  const ceramic = new THREE.MeshPhysicalMaterial({ color: 0xf4f4f2, metalness: 0, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.08, envMap: env, envMapIntensity: 0.9 });
+  const ceramic = new THREE.MeshPhysicalMaterial({ color: 0xf1ebdd, metalness: 0, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.08, envMap: env, envMapIntensity: 0.9 });
+  /* 漆のような艶のある色材 */
+  const lacquer = (hex, roughness = 0.26) => new THREE.MeshPhysicalMaterial({
+    color: hex, metalness: 0, roughness, clearcoat: 1, clearcoatRoughness: 0.05, envMap: env, envMapIntensity: 0.8,
+  });
+  const M = { chrome, ceramic, red: lacquer(0xb3402b), ochre: lacquer(0xc9953a), indigo: lacquer(0x2a3e5c) };
+  const DROP_MATS = [M.ochre, M.red, M.indigo];
   const dropGeo = dropGeometry();
 
   const views = new Map();
@@ -159,18 +203,18 @@ function init() {
     scene.add(holder);
 
     const kind = el.dataset['3d'];
-    const shape = buildShape(kind, chrome, ceramic);
+    const shape = buildShape(kind, M);
     holder.add(shape);
 
     const drops = [];
     const n = el.dataset.drops !== undefined ? parseInt(el.dataset.drops, 10) : 3;
     for (let i = 0; i < n; i++) {
-      const m = new THREE.Mesh(dropGeo, chrome);
+      const m = new THREE.Mesh(dropGeo, DROP_MATS[i % DROP_MATS.length]);
       const a = (i / Math.max(n, 1)) * Math.PI * 2 + Math.random() * 0.8;
       const r = 1.9 + Math.random() * 0.7;
       m.userData = {
         base: new THREE.Vector3(Math.cos(a) * r, Math.sin(a) * r * 0.75, (Math.random() - 0.5) * 1.5),
-        s: 0.12 + Math.random() * 0.12,
+        s: 0.17 + Math.random() * 0.1,
         phase: Math.random() * Math.PI * 2,
         spin: new THREE.Vector3(Math.random(), Math.random(), Math.random()).multiplyScalar(0.6),
       };
@@ -241,7 +285,7 @@ function init() {
         if (v.morph <= 0) {
           v.holder.remove(v.shape);
           v.shape.traverse((o) => { if (o.geometry && o.geometry !== dropGeo) o.geometry.dispose(); });
-          v.shape = buildShape(v.pending, chrome, ceramic);
+          v.shape = buildShape(v.pending, M);
           v.holder.add(v.shape);
           v.kind = v.pending;
           v.pending = null;
@@ -272,6 +316,9 @@ function init() {
         );
         v.holder.position.y = Math.sin(time * 0.8 + v.seed) * 0.08;
       }
+
+      /* 輪はそれぞれの軸でゆっくり回す */
+      (v.shape.userData.spin || []).forEach((ring, i) => { ring.rotation.z += dt * (i ? -0.5 : 0.35); });
 
       v.drops.forEach((m) => {
         const u = m.userData;

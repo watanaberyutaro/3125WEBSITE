@@ -149,10 +149,47 @@ const CHAPTERS = [
 ];
 const KANJI = ["一", "二", "三"];
 
+/* 特集面で各サービスの下に添える「主な内容」（/services の一覧から抜粋） */
+const POINTS: Record<string, string[]> = {
+  "/services#education": ["ChatGPT・Claude・Gemini 実践活用", "業務別プロンプト設計・最適化", "継続的フォローアップ・定着支援"],
+  "/services#training": ["AIリテラシー基礎研修（全社向け）", "部署別AI活用ワークショップ", "管理職・経営層向けAI戦略研修"],
+  "/services#implementation": ["AI活用戦略・ロードマップ策定", "業務課題の分析とAIツール選定", "運用定着・継続サポート"],
+  "/services#web": ["コーポレート・ブランドサイト制作", "採用・リクルートサイト制作", "保守・運用・SEO対策"],
+  "/services#custom-system": ["業務システムの要件定義・設計", "業務効率化ツール・社内アプリの開発", "運用保守まで一貫して担当"],
+  "/services#content": ["SNS投稿コンテンツの企画・制作・運用", "AI文章生成を使ったWeb記事・LP制作", "既存コンテンツのリライト・最適化"],
+  "/services#video": ["企業PR・ブランディング映像", "採用・会社紹介動画", "SNS・Web広告用ショート動画"],
+};
+
+/* 特集面の各面の末尾に置く囲み（各サービス紹介の内容から） */
+const CHAPTER_NOTES: Record<string, { head: string; body: string; listHead: string; list: string[] }> = {
+  Learn: {
+    head: "学び方は二通り",
+    body: "経営者・担当者お一人に合わせた完全個別のマンツーマン指導と、チーム・部署・全社単位の研修。座学で終わらせず、翌日から使えるところまで手を動かします。",
+    listHead: "対象",
+    list: ["経営者・ビジネスパーソン", "チーム・部署・全社", "管理職・経営層"],
+  },
+  Create: {
+    head: "制作は一貫して",
+    body: "企画・構成から撮影・編集・公開まで、一つのチームで担当します。AIを活用して制作の手間を抑え、続けて発信できる体制まで整えます。",
+    listHead: "制作物",
+    list: ["企業PR・採用映像", "SNS投稿", "Web記事・LP", "画像・デザイン素材"],
+  },
+};
+
+/* 第一面の記事に添える「支援の主な内容」（/services の一覧から抜粋） */
+const FRONT_BRIEF = [
+  "ChatGPT・Claude・Gemini 実践活用",
+  "AI活用戦略・ロードマップ策定",
+  "業務別プロンプト設計・最適化",
+  "社内AI環境の構築・設定",
+  "部署別AI活用ワークショップ",
+  "管理職・経営層向けAI戦略研修",
+];
+
 const PILLARS = [
-  { shape: "helix", en: "Learn", jp: "まなぶ", caption: "「まなぶ」を表す立体模型。マンツーマン指導で「使える」から「使いこなす」へ。", body: "経営者・ビジネスパーソン向けの完全個別指導と、チーム単位の実践的なAI研修。" },
-  { shape: "stack", en: "Build", jp: "つくる", caption: "「つくる」を表す立体模型。戦略策定から社内導入・運用定着まで一貫して伴走。", body: "AI導入の戦略策定から運用定着まで。Web制作とオーダーメイドのシステム開発も。" },
-  { shape: "cone", en: "Create", jp: "つたえる", caption: "「つたえる」を表す立体模型。AI×クリエイティブで映像・Web・SNSを制作。", body: "AIを活用した映像・Web・SNSコンテンツの制作と、企業PR・採用向けの映像制作。" },
+  { svcs: ["AIマンツーマン教育", "AI研修・ワークショップ"], shape: "helix", en: "Learn", jp: "まなぶ", caption: "「まなぶ」を表す立体模型。マンツーマン指導で「使える」から「使いこなす」へ。", body: "経営者・ビジネスパーソン向けの完全個別指導と、チーム単位の実践的なAI研修。" },
+  { svcs: ["AI導入支援", "Web制作", "オーダーメイドシステム制作"], shape: "stack", en: "Build", jp: "つくる", caption: "「つくる」を表す立体模型。戦略策定から社内導入・運用定着まで一貫して伴走。", body: "AI導入の戦略策定から運用定着まで。Web制作とオーダーメイドのシステム開発も。" },
+  { svcs: ["AIコンテンツ制作", "映像制作"], shape: "orbit", en: "Create", jp: "つたえる", caption: "「つたえる」を表す立体模型。AI×クリエイティブで映像・Web・SNSを制作。", body: "AIを活用した映像・Web・SNSコンテンツの制作と、企業PR・採用向けの映像制作。" },
 ];
 
 const ArrowSvg = () => (
@@ -249,10 +286,25 @@ export default async function HomePage() {
                 <a href="#intro-heading">（社説に続く）</a>
               </p>
             </div>
+            <blockquote className="front__pull">
+              <p>「なんとなく使っている」を、「使いこなしている」へ。</p>
+              <cite>— AIマンツーマン教育より</cite>
+            </blockquote>
+            <div className="front__brief">
+              <h3 className="front__brief-head">支援の主な内容</h3>
+              <ul>
+                {FRONT_BRIEF.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+              <Link href="/services" className="front__brief-more">
+                七つのサービスを見る <ArrowSvg />
+              </Link>
+            </div>
           </article>
 
           <figure className="front__photo">
-            <div className="hero-stage" data-3d="helix" data-drops="2" data-scale="0.62">
+            <div className="hero-stage" data-3d="helix" data-drops="3" data-scale="0.78">
               <p className="hero-stage__tag">
                 <b>Learn</b>
                 <span>まなぶ</span>
@@ -264,6 +316,12 @@ export default async function HomePage() {
             </div>
             <figcaption className="hero-stage__caption" />
             <p className="front__credit">写真は支援領域を表す立体模型（イメージ）</p>
+            <aside className="front__note">
+              <p className="front__note-head">解説</p>
+              <p>
+                三つの支援は、別々のメニューではなく一つの流れです。「まなぶ」で使いこなす力をつけ、「つくる」で業務の仕組みに落とし込み、「つたえる」で価値として届ける。いまの課題に合う段階から、ご相談いただけます。
+              </p>
+            </aside>
           </figure>
 
           <div className="front__teasers" role="group" aria-label="3つの支援領域">
@@ -283,6 +341,11 @@ export default async function HomePage() {
                 </span>
                 <span className="pillar__en">{p.jp}</span>
                 <span className="pillar__jp">{p.body}</span>
+                <span className="pillar__svcs">
+                  {p.svcs.map((name) => (
+                    <span key={name}>{name}</span>
+                  ))}
+                </span>
               </button>
             ))}
           </div>
@@ -320,11 +383,18 @@ export default async function HomePage() {
 
       {/* ── 社説 ────────────────────────────────────────────── */}
       <section className="intro" aria-labelledby="intro-heading">
-        <div className="intro__visual intro__visual--ink" aria-hidden="true">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="ink-art" src="/assets/images/editorial-sign.jpg" alt="" loading="lazy" decoding="async" />
-          <span className="marks">+ + +</span>
-          <span className="label">社説 · Editorial</span>
+        <div className="intro__aside">
+          <div className="intro__visual intro__visual--ink" aria-hidden="true">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="ink-art" src="/assets/images/editorial-sign.jpg" alt="" loading="lazy" decoding="async" />
+            <span className="marks">+ + +</span>
+            <span className="label">社説 · Editorial</span>
+          </div>
+          <blockquote className="intro__mission">
+            <p className="intro__mission-k">Our Mission</p>
+            <p className="intro__mission-q">AIの可能性を、ビジネスへ。</p>
+            <p className="intro__mission-b">人とAIが共に機能する組織をつくるパートナーとして、伴走します。</p>
+          </blockquote>
         </div>
         <div className="intro__copy">
           <h2 className="display intro__title" id="intro-heading">
@@ -343,6 +413,21 @@ export default async function HomePage() {
             <p className="intro__text reveal d2">
               技術の知識と教育のノウハウを融合させ、あなたのビジネスにAIを定着させる——それが{siteConfig.shortName}の使命です。
             </p>
+            <h3 className="intro__sub">道具の先にある「人」へ</h3>
+            <p className="intro__text">
+              AIは道具です。使いこなす人間があってはじめて価値が生まれる。私たちは技術の先にある「人の成長」と「ビジネスの変革」にフォーカスし、一社一社に向き合い続けます。
+            </p>
+            <p className="intro__text">
+              理論だけのAI導入は意味がありません。実際の業務フローに溶け込み、担当者が自走できるAI活用の仕組みを設計します。
+            </p>
+            <h3 className="intro__sub">組織の思考と行動を変える</h3>
+            <p className="intro__text">
+              AIの導入は、ツールを使えるようにすることではありません。組織の思考と行動様式そのものを変えること——それが私たちの目指す支援です。人とAIが共に機能する組織をつくるパートナーとして伴走します。
+            </p>
+            <p className="intro__text">
+              2024年の創業以来、マンツーマン教育・導入支援・研修を通じて、業種・規模を問わず多くの企業のAI活用を支援してきました。
+            </p>
+            <p className="intro__sign">{siteConfig.name}</p>
           </div>
           <div className="intro__foot">
             <span className="marks" aria-hidden="true">+ + +</span>
@@ -390,9 +475,28 @@ export default async function HomePage() {
                       <p className="feature__tag">サービス {svc.num}</p>
                       <h4 className="feature__title">{svc.title}</h4>
                       <p className="feature__body">{svc.body}</p>
+                      {POINTS[svc.href] && (
+                        <ul className="feature__points">
+                          {POINTS[svc.href].map((pt) => (
+                            <li key={pt}>{pt}</li>
+                          ))}
+                        </ul>
+                      )}
                       <Link className="feature__more" href={svc.href}>詳しく見る →</Link>
                     </article>
                   ))}
+                  {CHAPTER_NOTES[c.en] && (
+                    <aside className="feature__note">
+                      <p className="feature__note-head">{CHAPTER_NOTES[c.en].head}</p>
+                      <p className="feature__note-body">{CHAPTER_NOTES[c.en].body}</p>
+                      <p className="feature__note-list">
+                        <b>{CHAPTER_NOTES[c.en].listHead}</b>
+                        {CHAPTER_NOTES[c.en].list.map((x) => (
+                          <span key={x}>{x}</span>
+                        ))}
+                      </p>
+                    </aside>
+                  )}
                 </section>
               ))}
             </div>
