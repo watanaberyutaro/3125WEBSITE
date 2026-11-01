@@ -38,7 +38,7 @@ export function HomeCta({
         <header className="ad-page__bar">
           <span className="ad-page__tag">広告</span>
           <span className="ad-page__sponsor">
-            {siteConfig.name} ／ 東京・南青山
+            {siteConfig.name}
           </span>
         </header>
         <div className="ad-page__body">

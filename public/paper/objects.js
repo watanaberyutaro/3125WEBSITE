@@ -201,6 +201,7 @@ function init() {
 
   const clock = new THREE.Clock();
   let time = 0;
+  let idle = false;
   const easeOutBack = (t) => 1 + 2.2 * Math.pow(t - 1, 3) + 1.2 * Math.pow(t - 1, 2);
 
   function render() {
@@ -212,12 +213,25 @@ function init() {
     mouse.y += (mouse.ty - mouse.y) * 0.06;
 
     const W = window.innerWidth, H = window.innerHeight;
-    renderer.setScissor(0, 0, W, H);
-    renderer.clear();
 
+    /* 模型が1つも画面内にないときは、一度だけ消去してあとは何もしない
+       （全画面キャンバスの消去と CSS フィルターの再計算を毎フレーム続けないため） */
+    const visible = [];
     views.forEach((v) => {
       const r = v.el.getBoundingClientRect();
       if (r.bottom < 0 || r.top > H || r.right < 0 || r.left > W || r.width < 2 || r.height < 2) return;
+      visible.push([v, r]);
+    });
+    if (!visible.length) {
+      if (!idle) { renderer.setScissor(0, 0, W, H); renderer.clear(); idle = true; }
+      return;
+    }
+    idle = false;
+
+    renderer.setScissor(0, 0, W, H);
+    renderer.clear();
+
+    visible.forEach(([v, r]) => {
 
       /* shape swap: shrink out, rebuild, spring in */
       const want = v.el.dataset['3d'];

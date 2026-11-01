@@ -155,8 +155,8 @@
       gsap.set(panel, { yPercent: 0 });
       doc.classList.remove('is-veiled');
       gsap.timeline({ onComplete: () => { veil.classList.remove('is-on'); resolve(); } })
-        .to(panel.children, { opacity: 0, duration: 0.25 }, 0.05)
-        .to(panel, { yPercent: -100, duration: 0.7, ease: 'expo.inOut' }, 0.1);
+        .to(panel.children, { opacity: 0, duration: 0.2 }, 0)
+        .to(panel, { yPercent: -100, duration: 0.55, ease: 'expo.inOut' }, 0.05);
     });
   }
 
@@ -166,8 +166,8 @@
     const panel = veil.querySelector('.veil__panel');
     veil.classList.add('is-on');
     gsap.timeline({ onComplete: () => { window.location.href = href; } })
-      .fromTo(panel, { yPercent: 100 }, { yPercent: 0, duration: 0.6, ease: 'expo.inOut' })
-      .fromTo(panel.children, { opacity: 0 }, { opacity: 1, duration: 0.2 }, '-=0.15');
+      .fromTo(panel, { yPercent: 100 }, { yPercent: 0, duration: 0.42, ease: 'expo.inOut' })
+      .fromTo(panel.children, { opacity: 0 }, { opacity: 1, duration: 0.15 }, '-=0.12');
     setTimeout(() => { window.location.href = href; }, 2000);
   }
 
@@ -253,13 +253,19 @@
     cursor.innerHTML = '<span class="cursor__label"></span>';
     const label = cursor.firstChild;
     let tx = -100, ty = -100, cx = tx, cy = ty;
-    document.addEventListener('mousemove', (e) => { tx = e.clientX; ty = e.clientY; doc.classList.add('cursor-on'); }, { passive: true });
-    document.addEventListener('mouseleave', () => doc.classList.remove('cursor-on'));
-    (function loop() {
+    /* 追従が止まったらループも止める（静止中まで毎フレーム合成し直さない） */
+    let running = false;
+    function loop() {
       cx += (tx - cx) * 0.25; cy += (ty - cy) * 0.25;
+      if (Math.abs(tx - cx) < 0.1 && Math.abs(ty - cy) < 0.1) { cx = tx; cy = ty; running = false; }
       cursor.style.transform = `translate3d(${cx}px, ${cy}px, 0)`;
-      requestAnimationFrame(loop);
-    })();
+      if (running) requestAnimationFrame(loop);
+    }
+    document.addEventListener('mousemove', (e) => {
+      tx = e.clientX; ty = e.clientY; doc.classList.add('cursor-on');
+      if (!running) { running = true; requestAnimationFrame(loop); }
+    }, { passive: true });
+    document.addEventListener('mouseleave', () => doc.classList.remove('cursor-on'));
     document.addEventListener('mouseover', (e) => {
       const view = e.target.closest('.work-card, .wc__card');
       const hot = e.target.closest('a, button, select, input, textarea, label, .pillar');
@@ -792,9 +798,19 @@
   })();
 
   const opening = () => (window.runIntro ? window.runIntro(lenis) : runLoader());
-  const ready = doc.classList.contains('is-veiled') ? (skipLoader(), veilOut()) : opening();
 
-  ready.then(() => {
+  /* シャッター遷移で来たときは、幕が上がり始めるのと同じフレームで演出を組み立てる。
+     幕が上がり切ってから組み立てると、見えていたカードや本文が一瞬消えてから
+     出直す（フラッシュする）ため。 */
+  if (doc.classList.contains('is-veiled')) {
+    skipLoader();
+    veilOut();
+    start();
+  } else {
+    opening().then(start);
+  }
+
+  function start() {
     if (motion) {
       initHeadings();
       initReveals();
@@ -810,7 +826,7 @@
     }
     doc.classList.add('is-ready');
     scrollToHash();
-  });
+  }
 
   window.addEventListener('load', () => { if (hasGSAP) ScrollTrigger.refresh(); });
   if (document.fonts && document.fonts.ready && hasGSAP) document.fonts.ready.then(() => ScrollTrigger.refresh());

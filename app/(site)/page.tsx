@@ -187,7 +187,7 @@ export default async function HomePage() {
           </div>
           <div className="masthead__center">
             <p className="masthead__title">The 3125 Times</p>
-            <p className="masthead__sub">三一二五新報　AI AGENCY · TOKYO</p>
+            <p className="masthead__sub">三一二五新報　AI AGENCY</p>
           </div>
           <div className="masthead__ear masthead__ear--r">
             <p className="masthead__date" data-today="" suppressHydrationWarning />
@@ -219,7 +219,7 @@ export default async function HomePage() {
 
         <div className="hero-bar">
           <span className="marks" aria-hidden="true">+ — + — +</span>
-          <p className="hero-bar__copy reveal d2">東京・南青山発　《 まなぶ・つくる・つたえる 》 三つの支援で伴走</p>
+          <p className="hero-bar__copy reveal d2">《 まなぶ・つくる・つたえる 》 三つの支援で伴走</p>
           <span className="marks" aria-hidden="true">+ — + — +</span>
         </div>
 
@@ -230,7 +230,6 @@ export default async function HomePage() {
           </div>
 
           <article className="front__lead">
-            <p className="front__dateline">【東京・南青山】</p>
             <h2 className="front__subhead">
               マンツーマン教育から組織全体の導入まで
               <br />

@@ -256,7 +256,28 @@ html.is-veiled::after {
   inset: 0;
   z-index: 9999;
   background: var(--ink);
+  /* 万一 main.js が読めなくても、5秒で幕を外して本文を出す */
+  animation: veil-failsafe 0.3s 5s forwards;
 }
+/* 遷移前の幕と同じ「3125」を、新しいページの最初の幕にも出す
+   （無地の幕→ロゴの幕と切り替わって、ロゴが一瞬消えて見えていたため） */
+html.is-veiled::before {
+  content: '3125';
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  color: var(--paper);
+  font-family: var(--font-logo, 'Alex Brush', cursive);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  font-size: clamp(60px, 10vw, 150px);
+  line-height: 1;
+  pointer-events: none;
+  animation: veil-failsafe 0.3s 5s forwards;
+}
+@keyframes veil-failsafe { to { opacity: 0; visibility: hidden; } }
 .veil { position: fixed; inset: 0; z-index: 9998; visibility: hidden; pointer-events: none; }
 .veil.is-on { visibility: visible; pointer-events: all; }
 .veil__panel {
@@ -793,6 +814,19 @@ html:not(.motion) .marquee__track, html:not(.motion) .ticker__track { animation:
   color: var(--ink);
   background: radial-gradient(circle at 32% 28%, #fff 0%, #c4c4c4 30%, #3a3a3a 64%, #d4d4d4 100%);
 }
+/* 紙面版: 苗字の角印。朱肉のかすれは二重枠と僅かな傾きで表す */
+.team-card__seal {
+  display: grid; place-items: center;
+  width: 64px; height: 64px; margin-bottom: 28px;
+  border: 2px solid var(--red, #b8321f);
+  outline: 1px solid var(--red, #b8321f); outline-offset: -6px;
+  color: var(--red, #b8321f);
+  font-family: 'Shippori Mincho B1', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  font-weight: 800; font-size: 19px; line-height: 1.05; letter-spacing: 0.06em;
+  writing-mode: vertical-rl;
+  transform: rotate(-4deg);
+  opacity: 0.88;
+}
 .team-card__role { font-family: var(--font-en); font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--mute); margin-bottom: 8px; }
 .team-card__name { font-size: 22px; font-weight: 700; line-height: 1.4; margin-bottom: 16px; }
 .team-card__name-en { display: block; font-family: var(--font-en); font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--mute); }
@@ -850,6 +884,25 @@ html:not(.motion) .marquee__track, html:not(.motion) .ticker__track { animation:
 .hn__title { font-size: 15px; font-weight: 500; }
 
 .news-filter, .works-filter { display: flex; border: 1px solid var(--ink); width: max-content; max-width: 100%; margin-bottom: 40px; }
+/* 一覧ページ: ヒーロー直下の上余白を詰める（検索・絞り込み・索引の上に空白の帯ができていた） */
+.section:has(> .works-filter, > .news-filter, > form[role="search"], > .term-nav) { padding-top: clamp(28px, 4vw, 48px); }
+
+/* 業種別・タグ別一覧の索引（components/paper/TermNav.tsx） */
+.term-nav { margin-bottom: 40px; }
+.term-nav__label {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+  font-family: var(--font-jp); font-size: 12px; font-weight: 800; letter-spacing: 0.2em;
+}
+.term-nav__label::before { content: ''; width: 8px; height: 8px; background: var(--ink); }
+.term-nav__list { display: flex; flex-wrap: wrap; padding: 1px 0 0 1px; list-style: none; }
+.term-nav__list a {
+  display: block; margin: -1px 0 0 -1px; padding: 9px 16px;
+  border: 1px solid var(--ink);
+  font-family: var(--font-jp); font-size: 13px; font-weight: 700; letter-spacing: 0.06em;
+  transition: background 0.3s, color 0.3s;
+}
+.term-nav__list a.active, .term-nav__list a:hover { background: var(--ink); color: var(--paper); }
+@media (max-width: 599px) { .term-nav__list a { padding: 8px 12px; font-size: 12px; } }
 .news-filter a, .filter-btn {
   padding: 10px 22px;
   font-family: var(--font-en);
@@ -870,7 +923,8 @@ html:not(.motion) .marquee__track, html:not(.motion) .ticker__track { animation:
 .news-item__content { flex: 1; min-width: 0; }
 .news-item__title { font-size: 18px; font-weight: 700; line-height: 1.6; margin-bottom: 8px; }
 .news-item__text { font-size: 13px; line-height: 1.9; opacity: 0.7; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 10px; }
-.news-item__arrow { font-family: var(--font-en); font-size: 11px; font-weight: 600; text-transform: uppercase; }
+.news-item__arrow { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-family: var(--font-en); font-size: 11px; font-weight: 600; text-transform: uppercase; }
+.news-item__arrow svg { display: inline-block; flex: none; } /* Tailwind の preflight が svg を block にして矢印が改行するため */
 .news-empty { padding: 60px var(--pad); color: var(--mute); }
 
 
@@ -1055,7 +1109,7 @@ html:not(.motion) .marquee__track, html:not(.motion) .ticker__track { animation:
   background-color: #f1f1ee;
   color: var(--ink);
   font-family: var(--font-jp);
-  font-size: 15px;
+  font-size: 16px; /* 16px未満だと iOS Safari がフォーカス時に拡大する */
   appearance: none;
   -webkit-appearance: none;
   transition: background-color 0.3s, box-shadow 0.3s;
@@ -1211,6 +1265,12 @@ html:not(.motion) .marquee__track, html:not(.motion) .ticker__track { animation:
   --font-sfx:     'Dela Gothic One', sans-serif;
 }
 
+/* Lenis が毎フレーム scrollTop を書き換えるので、ブラウザ側のなめらかスクロール
+   （globals.css の html { scroll-behavior: smooth }）と二重にかかると、毎フレーム
+   ブラウザのアニメーションがやり直しになり、ホイールへの反応が大きく遅れる。
+   Lenis が動いている間だけ無効にする（Lenis 公式の推奨 CSS と同じ）。 */
+html.lenis { scroll-behavior: auto !important; }
+
 /* newsprint grain */
 body::after {
   content: '';
@@ -1219,7 +1279,10 @@ body::after {
   z-index: 4;
   pointer-events: none;
   opacity: 0.32;
-  mix-blend-mode: multiply;
+  /* 以前は mix-blend-mode: multiply。全画面の固定レイヤーを乗算すると、スクロールの毎フレーム
+     画面全体の合成がやり直しになり重かった。紙色の上ではほぼ同じ見え方になる通常合成にして、
+     独立したレイヤーに載せる。 */
+  transform: translateZ(0);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35  0 0 0 0 .3  0 0 0 0 .22  0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
@@ -1739,6 +1802,10 @@ body > .page-hero__strip--solo {
 
 /* ── 広告面 (home CTA): a display ad printed on the page ─────────── */
 .ad-page { padding: clamp(40px, 6vw, 88px) var(--pad); }
+/* main.js の「紙面のせり上がり」（3D回転）と「ハンコ」（拡大から押印）の途中の状態が
+   横にはみ出し、スマホでページ全体の幅が広がってハンバーガーが画面外に出ていたため、
+   各面を横方向だけ切り取る。clip はスクロール領域を作らないので sticky は効いたまま。 */
+body > section, body > header { overflow-x: clip; }
 .ad-page__frame { border: 6px solid var(--ink); outline: 1px solid var(--ink); outline-offset: 4px; background: #f3ede1; }
 .ad-page__bar {
   display: flex; justify-content: space-between; align-items: center; gap: 12px;
@@ -1793,6 +1860,13 @@ body > .page-hero__strip--solo {
   .ad-page__ticket-t { font-size: 16px; letter-spacing: 0.04em; white-space: nowrap; }
   .ad-page__contacts a + a { padding-left: 0; border-left: 0; border-top: 1px solid var(--ink); }
   .ad-page__sponsor { font-size: 11px; letter-spacing: 0.08em; }
+}
+/* スマホ幅: 見出しの1行（「ビジネスを変えませんか。」）が枠からはみ出して
+   ページ全体が横に広がり、ハンバーガーが画面外に出ていたため、幅に合わせて縮める。
+   それでも収まらない端末では折り返す。 */
+@media (max-width: 599px) {
+  .ad-page__title { font-size: clamp(20px, 5.6vw, 30px); letter-spacing: 0; }
+  .ad-page__title > span { white-space: normal; }
 }
 
 /* ── Logo: script numerals ────────────────────────────────────── */
