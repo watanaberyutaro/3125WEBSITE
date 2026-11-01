@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { PaperStrip } from "@/components/paper/PaperStrip";
+import { paperSectionFor } from "@/lib/paper/sections";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -76,6 +78,7 @@ export default async function WorkDetailPage({
         })}
       />
 
+      <PaperStrip section={paperSectionFor("/works")!} solo />
       <div className="work-detail-hero" aria-label="プロジェクトビジュアル">
         {work.coverImageUrl && (
           <Image

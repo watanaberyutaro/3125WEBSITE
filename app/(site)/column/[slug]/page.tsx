@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { PaperStrip } from "@/components/paper/PaperStrip";
+import { paperSectionFor } from "@/lib/paper/sections";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -79,6 +81,7 @@ export default async function ArticleDetailPage({
         })}
       />
 
+      <PaperStrip section={paperSectionFor("/column")!} solo />
       <div className="article-hero">
         <Link href="/column" className="article-hero__back">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
