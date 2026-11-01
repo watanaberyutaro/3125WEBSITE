@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PageHero } from "@/components/layout/PageHero";
 import { WorksGrid } from "@/components/works/WorksGrid";
-import { TermNav } from "@/components/paper/TermNav";
 import { Breadcrumb } from "@/components/seo/Breadcrumb";
 import { getPublishedWorks, getWorkIndustries } from "@/lib/works/queries";
 import { buildMetadata } from "@/lib/seo/metadata";
@@ -58,14 +57,6 @@ export default async function WorksIndustryPage({
         description="映像制作・Webサイト制作・写真撮影——クライアントの想いを形にした、私たちの仕事の記録です。"
       />
       <section className="section section--dark" aria-label={`${current.name}業界の制作実績一覧`}>
-        <TermNav
-          label="業種で探す"
-          allHref="/works"
-          allLabel="すべての実績"
-          items={industries}
-          activeSlug={industry}
-          hrefFor={(slug) => `/works/industry/${slug}`}
-        />
         <WorksGrid works={works} />
       </section>
     </>

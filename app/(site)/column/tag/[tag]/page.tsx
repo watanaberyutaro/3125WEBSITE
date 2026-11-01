@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PageHero } from "@/components/layout/PageHero";
 import { ArticleList } from "@/components/column/ArticleList";
-import { TermNav } from "@/components/paper/TermNav";
 import { Breadcrumb } from "@/components/seo/Breadcrumb";
 import { getArticleTags, getPublishedArticles } from "@/lib/column/queries";
 import { buildMetadata } from "@/lib/seo/metadata";
@@ -58,15 +57,6 @@ export default async function ColumnTagPage({
         description="このタグが付いた記事の一覧です。"
       />
       <section className="section section--dark" aria-label={`${current.name}タグの記事一覧`}>
-        <TermNav
-          label="タグで探す"
-          allHref="/column"
-          allLabel="すべての記事"
-          items={tags}
-          activeSlug={tag}
-          prefix="#"
-          hrefFor={(slug) => `/column/tag/${slug}`}
-        />
         <ArticleList articles={articles} />
       </section>
     </>

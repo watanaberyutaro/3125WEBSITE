@@ -129,9 +129,6 @@ export function Nav() {
             <span />
           </button>
         </div>
-        <div className="nav__progress" aria-hidden="true">
-          <i />
-        </div>
       </nav>
 
       <div

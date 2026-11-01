@@ -4,6 +4,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { organizationJsonLd } from "@/lib/seo/jsonld";
 import { siteConfig } from "@/lib/site-config";
 import "./globals.css";
+import "@/styles/legacy-site.css";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
@@ -76,7 +77,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#ece5d5",
+  themeColor: "#0F0F0D",
 };
 
 export default function RootLayout({
@@ -87,7 +88,6 @@ export default function RootLayout({
   return (
     <html
       lang="ja"
-      suppressHydrationWarning
       className={`${cormorant.variable} ${shippori.variable} ${dmMono.variable} ${montserrat.variable} ${alexBrush.variable}`}
     >
       <body className="antialiased">

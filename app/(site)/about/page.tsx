@@ -127,9 +127,8 @@ export default function AboutPage() {
         <RevealGrid className="team-grid">
           {TEAM.map((member) => (
             <article className="team-card" key={member.name}>
-              {/* 紙面版: 苗字の角印（ハンコ） */}
-              <div className="team-card__seal" aria-hidden="true">
-                {member.name.split(/[\s　]+/)[0]}
+              <div className="team-card__avatar" aria-hidden="true">
+                {member.initial}
               </div>
               <p className="team-card__role">{member.role}</p>
               <h3 className="team-card__name">

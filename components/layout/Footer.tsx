@@ -32,15 +32,9 @@ export function Footer() {
           <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a>
         </address>
       </div>
-      <p className="footer__colophon">
-        発行所　{siteConfig.name}　{siteConfig.address.full}　電話 {siteConfig.phone}
-      </p>
       <div className="footer__lower">
         <p className="footer__copy">© 2024–2025 {siteConfig.name}. All rights reserved.</p>
         <address className="footer__addr">{siteConfig.address.full}</address>
-      </div>
-      <div className="display footer__mark" aria-hidden="true" data-drift="-6">
-        3125
       </div>
     </footer>
   );

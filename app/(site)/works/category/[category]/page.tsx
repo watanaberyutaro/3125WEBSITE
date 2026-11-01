@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { PageHero } from "@/components/layout/PageHero";
 import { WorksFilter } from "@/components/works/WorksFilter";
 import { WorksGrid } from "@/components/works/WorksGrid";
-import { workCategoryLabel, workCategoryNote } from "@/components/works/workCopy";
 import { Breadcrumb } from "@/components/seo/Breadcrumb";
 import { getPublishedWorks, getWorkCategories } from "@/lib/works/queries";
 import { buildMetadata } from "@/lib/seo/metadata";
@@ -55,11 +54,8 @@ export default async function WorksCategoryPage({
       <PageHero
         eyebrowNum="Works"
         label="Selected Works"
-        title={`${workCategoryLabel(current)}の実績。`}
-        description={
-          workCategoryNote(current) ??
-          "映像制作・Webサイト制作・写真撮影——クライアントの想いを形にした、私たちの仕事の記録です。"
-        }
+        title={`${current.name}の実績。`}
+        description="映像制作・Webサイト制作・写真撮影——クライアントの想いを形にした、私たちの仕事の記録です。"
       />
       <section className="section section--dark" aria-label={`${current.name}の制作実績一覧`}>
         <WorksFilter categories={categories} activeCategory={category} useCleanUrls />
